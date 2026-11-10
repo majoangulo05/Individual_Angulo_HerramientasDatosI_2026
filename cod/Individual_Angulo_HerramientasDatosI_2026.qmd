@@ -230,8 +230,79 @@ resumen_canciones <- f0_canciones |>
 
 resumen_canciones
 
+```
+
+```{r}
+#| label: fig-trayectoria
+#| fig-cap: "Evolución temporal de la altura estimada en cada fragmento. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3.5
+
+# Se grafica la altura estimada a lo largo del tiempo, un panel por canción.
+f0_canciones |>
+  drop_na(midi) |>
+  ggplot(aes(x = tiempo, y = midi)) +
+  geom_point(size = 0.5, alpha = 0.6, colour = "#315F78") +
+  facet_wrap(vars(cancion), ncol = 2) +
+  scale_y_continuous(
+    breaks = c(64, 69, 74, 79, 84),
+    labels = c("Mi4", "La4", "Re5", "Sol5", "Do6")
+  ) +
+  labs(
+    title = "When You Wish Upon a Star recorre un registro más amplio",
+    subtitle = "Altura estimada cada 0.025 segundos; se excluyen los silencios",
+    x = "Tiempo (segundos)",
+    y = "Altura (nota)"
+  ) +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot",
+    strip.text = element_text(face = "bold")
+  )
 
 ```
+
+```{r}
+#| label: fig-distribucion
+#| fig-cap: "Distribución del tiempo con sonido por nota en cada fragmento. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3.5
+
+# Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
+distribucion_notas <- f0_canciones |>
+  drop_na(midi) |>
+  mutate(nota = round(midi)) |>
+  count(cancion, nota) |>
+  mutate(porcentaje = 100 * n / sum(n), .by = cancion)
+
+# Se grafica la distribución, un panel por canción.
+distribucion_notas |>
+  ggplot(aes(x = nota, y = porcentaje)) +
+  geom_col(fill = "#315F78") +
+  facet_wrap(vars(cancion), ncol = 2) +
+  scale_x_continuous(
+    breaks = c(64, 69, 74, 79, 84),
+    labels = c("Mi4", "La4", "Re5", "Sol5", "Do6")
+  ) +
+  labs(
+    title = "Recuérdame pasa casi la mitad del tiempo en dos notas",
+    subtitle = "Porcentaje del tiempo con sonido en cada nota; se excluyen los silencios",
+    x = "Altura (nota)",
+    y = "Tiempo con sonido (%)"
+  ) +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot",
+    strip.text = element_text(face = "bold")
+  )
+```
+
+
+
+
+
 
 
 
