@@ -78,70 +78,74 @@ av_audio_convert(
 
 # Se importa las dos grabaciones para los espectogramas.
 audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
-audio_wish <- readWave("../data/when_you_wish_toma1.wav")
+audio.wish <- readWave("../data/when_you_wish_toma1.wav")
 
 # Características técnicas de cada grabación
-caracteristicas_audio <- tibble(
+caracteristicas.audio <- tibble(
   cancion = c("Recuérdame", "When You Wish Upon a Star"),
-  frecuencia_muestreo = c(audio.recuerdame@samp.rate, audio_wish@samp.rate),
+  frecuencia.muestreo = c(audio.recuerdame@samp.rate, audio.wish@samp.rate),
   canales = c(
     if (audio.recuerdame@stereo) 2 else 1,
-    if (audio_wish@stereo) 2 else 1
+    if (audio.wish@stereo) 2 else 1
   ),
   duracion = c(
     length(audio.recuerdame@left) / audio.recuerdame@samp.rate,
-    length(audio_wish@left) / audio_wish@samp.rate
+    length(audio.wish@left) / audio.wish@samp.rate
   )
 )
 
-caracteristicas_audio
+caracteristicas.audio
 ```
 
 ```{r}
+#| label: resumen-onda
 #| include: false
 
-# Instalación inicial del paquete av.
-# Este comando ya se ejecutó en la consola de RStudio:
-# install.packages ("av")
+# Resume la forma de onda de una grabación: divide las muestras en unos
+# 2500 intervalos y obtiene la amplitud mínima y máxima de cada uno.
+resumir.onda <- function(audio, cancion) {
+  muestras.bloque <- ceiling(length(audio@left) / 2500)
+  num.bloques <- length(audio@left) %/% muestras.bloque
 
-# Se carga el paquete para procesar las grabaciones.
-library(av)
+  bloques <- matrix(
+    audio@left[seq_len(num.bloques * muestras.bloque)],
+    nrow = muestras.bloque
+  )
 
-av_audio_convert (
-  audio = "../data/recuerdame_toma1.m4a", 
-  output = "../data/recuerdame_toma1.wav",
-  total_time = 28.3,
-  verbose = FALSE
-)
- # se convierte a wav para poder utilizar luego tuneR y obtener el audio como objeto
+  tibble(
+    cancion = cancion,
+    tiempo = (seq_len(num.bloques) - 0.5) * muestras.bloque / audio@samp.rate,
+    minimo = apply(bloques, 2, min),
+    maximo = apply(bloques, 2, max)
+  )
+}
 
-# Instalación incial de tuneR.
-# Este comando se ejecutó en la consola:
-# install.packages("tuneR")
-
-# Se carga el paquete para trabajar con archivos WAV
-library(tuneR)
-
-# Se importa la grbación procesada de Recuérdame.
-audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
-
-# Características técnicas de la grabación.
-
-frecuencia.muestreo <- audio.recuerdame@samp.rate
-canales <- if (audio.recuerdame@stereo) 2 else 1
-duracion <- length(audio.recuerdame@left) / frecuencia.muestreo
-
-#Resumen de las características del audio.
-
-data.frame(
-  Caracteristica = c("Frecuencia de muestreo (Hz)",
-                     "Número de canales",
-                     "Duración (segundos)"),
-  Valor = c(frecuencia.muestreo,
-            canales,
-            round(duracion, 3))
+# Se aplica la función a las dos grabaciones y se unen los resultados.
+onda.canciones <- bind_rows(
+  resumir.onda(audio.recuerdame, "Recuérdame"),
+  resumir.onda(audio.wish, "When You Wish Upon a Star")
 )
 ```
+
+```{r}
+#| label: fig-onda
+#| fig-cap: "Forma de onda de cada grabación. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3
+
+# Se grafica la forma de onda, un panel por canción.
+onda.canciones |>
+  ggplot(aes(x = tiempo, ymin = minimo, ymax = maximo)) +
+  geom_linerange(colour = "#315F78", linewidth = 0.3) +
+  facet_wrap(vars(cancion), ncol = 2) +
+  labs(x = "Tiempo (segundos)", y = "Amplitud (valor digital)") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
+
 
 ```{r}
 #| label: fig-onda-recuerdame
@@ -232,15 +236,7 @@ hz_soundgen <- analisis_recuerdame$detailed$pitch
 table(round(69 + 12 * log2(hz_soundgen / 440)))
 ```
 
-```{r}
-# Se convierte la grabación de When You Wish Upon a Star a WAV.
-av_audio_convert(
-  audio = "../data/when_you_wish_toma1.m4a",
-  output = "../data/when_you_wish_toma1.wav",
-  total_time = 33.5,
-  verbose = FALSE
-)
-```
+
 
 ```{r}
 # Se estima la frecuencia fundamental de When You Wish Upon a Star
@@ -261,7 +257,6 @@ hz_wish <- analisis_wish$detailed$pitch
 table(round(69 + 12 * log2(hz_wish / 440)))
 ```
 ```{r}
-library(tidyverse)
 # Se reúnen las estimaciones de ambas canciones en una sola tabla.
 f0_canciones <- bind_rows(
   tibble(
