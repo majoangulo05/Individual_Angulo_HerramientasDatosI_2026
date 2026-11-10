@@ -199,6 +199,7 @@ espectro.canciones |>
     strip.text = element_text(face = "bold")
   )
 ```
+
 ```{r}
 #| label: estimacion-f0
 #| include: false
@@ -212,6 +213,10 @@ estimar.f0 <- function(archivo, cancion) {
     pitchFloor = 300,
     pitchCeiling = 1250,
     priorMean = NULL,
+    nFormants = 0,
+    loudness = NULL,
+    roughness = NULL,
+    novelty = NULL,
     plot = FALSE
   )
 
@@ -231,79 +236,23 @@ f0.canciones <- bind_rows(
 ```
 
 ```{r}
-# Se estima la frecuencia fundamental de Recuérdame con soundgen,
-# buscando solo dentro del rango de la partitura.
-analisis_recuerdame <- soundgen::analyze(
-  "../data/recuerdame_toma1.wav",
-  pitchMethods = "autocor",
-  pitchFloor = 300,
-  pitchCeiling = 1250,
-  priorMean = NULL,
-  plot = FALSE
-)
+#| label: resumen-canciones
 
-# Se toma la frecuencia estimada en cada ventana, en Hz.
-hz_soundgen <- analisis_recuerdame$detailed$pitch
-
-# Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
-table(round(69 + 12 * log2(hz_soundgen / 440)))
-```
-
-
-
-```{r}
-# Se estima la frecuencia fundamental de When You Wish Upon a Star
-# con los mismos parámetros para ambas grabaciones.
-analisis_wish <- soundgen::analyze(
-  "../data/when_you_wish_toma1.wav",
-  pitchMethods = "autocor",
-  pitchFloor = 300,
-  pitchCeiling = 1250,
-  priorMean = NULL,
-  plot = FALSE
-)
-
-# Se toma la frecuencia estimada en cada ventana, en Hz.
-hz_wish <- analisis_wish$detailed$pitch
-
-# Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
-table(round(69 + 12 * log2(hz_wish / 440)))
-```
-```{r}
-# Se reúnen las estimaciones de ambas canciones en una sola tabla.
-f0_canciones <- bind_rows(
-  tibble(
-    cancion = "Recuérdame",
-    tiempo = analisis_recuerdame$detailed$time / 1000,
-    hz = analisis_recuerdame$detailed$pitch
-  ),
-  tibble(
-    cancion = "When You Wish Upon a Star",
-    tiempo = analisis_wish$detailed$time / 1000,
-    hz = analisis_wish$detailed$pitch
-  )
-) |>
-  mutate(midi = 69 + 12 * log2(hz / 440))
-
-f0_canciones
-```
-
-```{r}
 # Se calculan las estadísticas de altura de cada canción.
-resumen_canciones <- f0_canciones |>
+resumen.canciones <- f0.canciones |>
   summarise(
-    ventanas_con_sonido = sum(!is.na(hz)),
-    mediana_hz = median(hz, na.rm = TRUE),
-    minimo_hz = min(hz, na.rm = TRUE),
-    maximo_hz = max(hz, na.rm = TRUE),
-    desviacion_semitonos = sd(midi, na.rm = TRUE),
-    rango_semitonos = max(midi, na.rm = TRUE) - min(midi, na.rm = TRUE),
-    rango_central_semitonos = quantile(midi, 0.95, na.rm = TRUE) -
+    ventanas.con.sonido = sum(!is.na(hz)),
+    mediana.hz = median(hz, na.rm = TRUE),
+    minimo.hz = min(hz, na.rm = TRUE),
+    maximo.hz = max(hz, na.rm = TRUE),
+    desviacion.semitonos = sd(midi, na.rm = TRUE),
+    rango.semitonos = max(midi, na.rm = TRUE) - min(midi, na.rm = TRUE),
+    rango.central.semitonos = quantile(midi, 0.95, na.rm = TRUE) -
       quantile(midi, 0.05, na.rm = TRUE),
     .by = cancion
   )
 
-resumen_canciones
+resumen.canciones
 ```
 
 ```{r}
@@ -313,7 +262,7 @@ resumen_canciones
 #| fig-height: 3.5
 
 # Se grafica la altura estimada a lo largo del tiempo, un panel por canción.
-f0_canciones |>
+f0.canciones |>
   drop_na(midi) |>
   ggplot(aes(x = tiempo, y = midi)) +
   geom_point(size = 0.5, alpha = 0.6, colour = "#315F78") +
@@ -334,7 +283,6 @@ f0_canciones |>
     plot.title.position = "plot",
     strip.text = element_text(face = "bold")
   )
-
 ```
 
 ```{r}
@@ -344,14 +292,14 @@ f0_canciones |>
 #| fig-height: 3.5
 
 # Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
-distribucion_notas <- f0_canciones |>
+distribucion.notas <- f0.canciones |>
   drop_na(midi) |>
   mutate(nota = round(midi)) |>
   count(cancion, nota) |>
   mutate(porcentaje = 100 * n / sum(n), .by = cancion)
 
 # Se grafica la distribución, un panel por canción.
-distribucion_notas |>
+distribucion.notas |>
   ggplot(aes(x = nota, y = porcentaje)) +
   geom_col(fill = "#315F78") +
   facet_wrap(vars(cancion), ncol = 2) +
