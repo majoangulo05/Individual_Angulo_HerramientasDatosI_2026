@@ -1,16 +1,43 @@
 ---
-title: "Análisis acústivo de melodías interpretadas en violín"
 lang: es
-format: 
-  typst: 
+format:
+  typst:
+    papersize: us-letter
+    margin:
+      x: 2.2cm
+      y: 2.2cm
+    mainfont: "Georgia"
     fontsize: 12pt
     number-sections: true
+knitr:
+  opts_chunk:
+    dev: ragg_png
+    dpi: 300
 execute:
   echo: false
   warning: false
   message: false
 editor: visual
 ---
+
+```{=typst}
+#set par(justify: true)
+
+#text(weight: "bold")[Universidad de Costa Rica] \
+Escuela de Matemática \
+CA-0204 --- Herramientas de Ciencia de Datos I \
+II ciclo, 2026
+
+#v(0.5em)
+#text(size: 17pt, weight: "bold")[Análisis acústico de dos melodías en violín] \
+#text(weight: "bold")[Proyecto individual --- Informe de resultados]
+
+#v(0.3em)
+María José Angulo Salas
+
+26 de noviembre de 2026
+#v(0.8em)
+```
 
 ```{r}
 #| include: false
