@@ -199,15 +199,36 @@ espectro.canciones |>
     strip.text = element_text(face = "bold")
   )
 ```
+```{r}
+#| label: estimacion-f0
+#| include: false
 
+# Estima la frecuencia fundamental de una grabación con soundgen. Devuelve una
+# tabla con el tiempo (s), la frecuencia (Hz) y la altura (MIDI) de cada ventana.
+estimar.f0 <- function(archivo, cancion) {
+  analisis <- soundgen::analyze(
+    archivo,
+    pitchMethods = "autocor",
+    pitchFloor = 300,
+    pitchCeiling = 1250,
+    priorMean = NULL,
+    plot = FALSE
+  )
 
+  tibble(
+    cancion = cancion,
+    tiempo = analisis$detailed$time / 1000,
+    hz = analisis$detailed$pitch,
+    midi = 69 + 12 * log2(hz / 440)
+  )
+}
 
-
-
-
-
-
-
+# Se aplica la función a las dos grabaciones, con los mismos parámetros.
+f0.canciones <- bind_rows(
+  estimar.f0("../data/recuerdame_toma1.wav", "Recuérdame"),
+  estimar.f0("../data/when_you_wish_toma1.wav", "When You Wish Upon a Star")
+)
+```
 
 ```{r}
 # Se estima la frecuencia fundamental de Recuérdame con soundgen,
