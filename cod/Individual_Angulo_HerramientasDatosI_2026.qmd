@@ -125,7 +125,7 @@ seewave::spectro(
   tlab = "Tiempo (segundos)",
   flab = "Frecuencia (kHz)",
   scalelab = "Nivel relativo (dB)"
-
+)
 ```
 
 ```{r}
