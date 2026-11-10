@@ -134,8 +134,8 @@ seewave::spectro(
 analisis_recuerdame <- soundgen::analyze(
   "../data/recuerdame_toma1.wav",
   pitchMethods = "autocor",
-  pitchFloor = 350,
-  pitchCeiling = 1100,
+  pitchFloor = 300,
+  pitchCeiling = 1250,
   priorMean = NULL,
   plot = FALSE
 )
@@ -146,6 +146,37 @@ hz_soundgen <- analisis_recuerdame$detailed$pitch
 # Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
 table(round(69 + 12 * log2(hz_soundgen / 440)))
 ```
+
+```{r}
+# Se convierte la grabación de When You Wish Upon a Star a WAV.
+av_audio_convert(
+  audio = "../data/when_you_wish_toma1.m4a",
+  output = "../data/when_you_wish_toma1.wav",
+  total_time = 33.5,
+  verbose = FALSE
+)
+```
+
+```{r}
+# Se estima la frecuencia fundamental de When You Wish Upon a Star
+# con los mismos parámetros para ambas grabaciones.
+analisis_wish <- soundgen::analyze(
+  "../data/when_you_wish_toma1.wav",
+  pitchMethods = "autocor",
+  pitchFloor = 300,
+  pitchCeiling = 1250,
+  priorMean = NULL,
+  plot = FALSE
+)
+
+# Se toma la frecuencia estimada en cada ventana, en Hz.
+hz_wish <- analisis_wish$detailed$pitch
+
+# Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
+table(round(69 + 12 * log2(hz_wish / 440)))
+```
+
+
 
 
 
