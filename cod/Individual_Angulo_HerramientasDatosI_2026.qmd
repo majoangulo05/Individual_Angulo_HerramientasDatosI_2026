@@ -40,6 +40,64 @@ María José Angulo Salas
 ```
 
 ```{r}
+#| label: paquetes
+#| include: false
+
+# Se empieza cargando los paquetes que se usan a lo largo del código 
+library(av)        # conversión de audio a WAV
+library(tuneR)     # lectura de archivos WAV
+library(seewave)   # espectrograma
+library(soundgen)  # estimación de la frecuencia fundamental
+library(tidyverse) # manipulación de datos y gráficos e incluye ggplot2
+```
+
+```{r}
+#| label: conversion-audio
+#| include: false
+
+# Se convierten las grabaciones originales a WAV. Se limita la duración
+# porque el último fragmento de cada archivo produce un error al decodificar.
+av_audio_convert(
+  audio = "../data/recuerdame_toma1.m4a",
+  output = "../data/recuerdame_toma1.wav",
+  total_time = 28.3,
+  verbose = FALSE
+)
+
+av_audio_convert(
+  audio = "../data/when_you_wish_toma1.m4a",
+  output = "../data/when_you_wish_toma1.wav",
+  total_time = 33.5,
+  verbose = FALSE
+)
+```
+
+```{r}
+#| label: lectura-audio
+#| include: false
+
+# Se importa las dos grabaciones para los espectogramas.
+audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
+audio_wish <- readWave("../data/when_you_wish_toma1.wav")
+
+# Características técnicas de cada grabación
+caracteristicas_audio <- tibble(
+  cancion = c("Recuérdame", "When You Wish Upon a Star"),
+  frecuencia_muestreo = c(audio.recuerdame@samp.rate, audio_wish@samp.rate),
+  canales = c(
+    if (audio.recuerdame@stereo) 2 else 1,
+    if (audio_wish@stereo) 2 else 1
+  ),
+  duracion = c(
+    length(audio.recuerdame@left) / audio.recuerdame@samp.rate,
+    length(audio_wish@left) / audio_wish@samp.rate
+  )
+)
+
+caracteristicas_audio
+```
+
+```{r}
 #| include: false
 
 # Instalación inicial del paquete av.
