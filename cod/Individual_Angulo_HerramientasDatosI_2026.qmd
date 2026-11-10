@@ -175,6 +175,64 @@ hz_wish <- analisis_wish$detailed$pitch
 # Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
 table(round(69 + 12 * log2(hz_wish / 440)))
 ```
+```{r}
+library(tidyverse)
+# Se reúnen las estimaciones de ambas canciones en una sola tabla.
+f0_canciones <- bind_rows(
+  tibble(
+    cancion = "Recuérdame",
+    tiempo = analisis_recuerdame$detailed$time / 1000,
+    hz = analisis_recuerdame$detailed$pitch
+  ),
+  tibble(
+    cancion = "When You Wish Upon a Star",
+    tiempo = analisis_wish$detailed$time / 1000,
+    hz = analisis_wish$detailed$pitch
+  )
+) |>
+  mutate(midi = 69 + 12 * log2(hz / 440))
+
+f0_canciones
+```
+
+```{r}
+# Se calculan las estadísticas de altura de cada canción.
+resumen_canciones <- f0_canciones |>
+  summarise(
+    ventanas_con_sonido = sum(!is.na(hz)),
+    mediana_hz = median(hz, na.rm = TRUE),
+    minimo_hz = min(hz, na.rm = TRUE),
+    maximo_hz = max(hz, na.rm = TRUE),
+    desviacion_semitonos = sd(midi, na.rm = TRUE),
+    rango_semitonos = max(midi, na.rm = TRUE) - min(midi, na.rm = TRUE),
+    rango_central_semitonos = quantile(midi, 0.95, na.rm = TRUE) -
+      quantile(midi, 0.05, na.rm = TRUE),
+    .by = cancion
+  )
+
+resumen_canciones
+```
+
+```{r}
+# Se calculan las estadísticas de altura de cada canción.
+resumen_canciones <- f0_canciones |>
+  summarise(
+    ventanas_con_sonido = sum(!is.na(hz)),
+    mediana_hz = median(hz, na.rm = TRUE),
+    minimo_hz = min(hz, na.rm = TRUE),
+    maximo_hz = max(hz, na.rm = TRUE),
+    desviacion_semitonos = sd(midi, na.rm = TRUE),
+    rango_semitonos = max(midi, na.rm = TRUE) - min(midi, na.rm = TRUE),
+    rango_central_semitonos = quantile(midi, 0.95, na.rm = TRUE) -
+      quantile(midi, 0.05, na.rm = TRUE),
+    .by = cancion
+  )
+
+resumen_canciones
+
+
+```
+
 
 
 
