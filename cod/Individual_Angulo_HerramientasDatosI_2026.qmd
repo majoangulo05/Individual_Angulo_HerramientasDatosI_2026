@@ -125,14 +125,27 @@ seewave::spectro(
   tlab = "Tiempo (segundos)",
   flab = "Frecuencia (kHz)",
   scalelab = "Nivel relativo (dB)"
-)
+
 ```
 
+```{r}
+# Se estima la frecuencia fundamental de Recuérdame con soundgen,
+# buscando solo dentro del rango de la partitura.
+analisis_recuerdame <- soundgen::analyze(
+  "../data/recuerdame_toma1.wav",
+  pitchMethods = "autocor",
+  pitchFloor = 350,
+  pitchCeiling = 1100,
+  priorMean = NULL,
+  plot = FALSE
+)
 
+# Se toma la frecuencia estimada en cada ventana, en Hz.
+hz_soundgen <- analisis_recuerdame$detailed$pitch
 
-
-
-
+# Se convierte a número MIDI y se cuenta cuántas ventanas hay en cada nota.
+table(round(69 + 12 * log2(hz_soundgen / 440)))
+```
 
 
 
