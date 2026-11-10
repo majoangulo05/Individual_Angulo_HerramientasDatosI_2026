@@ -146,59 +146,6 @@ onda.canciones |>
   )
 ```
 
-
-```{r}
-#| label: fig-onda-recuerdame
-#| fig-cap: "Forma de onda de Recuérdame. Fuente: grabación propia."
-#| echo: false
-# Se visualiza cómo cambia la amplitud del audio con el tiempo
-plot(
-  audio.recuerdame,
-  xunit = "time",
-  main = "Forma de onda de Recuérdame",
-  xlab = "Tiempo (segundos)",
-  ylab = NA
-) 
-
-
-
-```
-
-```{r}
-library(ggplot2)
-
-# Se agrupan las muestras en aproximadamente 2500 intervalos,
-# tomando como referencia el valor predeterminado de tuneR.
-muestras.bloque <- ceiling(length(audio.recuerdame@left) / 2500)
-
-num.bloques <- length(audio.recuerdame@left) %/% muestras.bloque
-
-bloques <- matrix(
-  audio.recuerdame@left[seq_len(num.bloques * muestras.bloque)],
-  nrow = muestras.bloque
-)
-
-# Se obtiene la amplitud mínima y máxima de cada intervalo.
-onda.resumen <- data.frame(
-  tiempo = (seq_len(num.bloques) - 0.5) *
-           muestras.bloque / frecuencia.muestreo,
-  minimo = apply(bloques, 2, min),
-  maximo = apply(bloques, 2, max)
-)
-
-# Se construye la forma de onda.
-ggplot(onda.resumen, aes(x = tiempo, ymin = minimo, ymax = maximo)) +
-  geom_linerange(color = "#315F78", linewidth = 0.3) +
-  labs(
-    x = "Tiempo (segundos)",
-    y = "Amplitud (valor digital)"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.grid.minor = element_blank()
-  )
-```
-
 ```{r}
 #| label: fig-espectrograma-prueba
 #| fig-cap: "Espectrograma exploratorio de Recuérdame. Fuente: grabación propia."
