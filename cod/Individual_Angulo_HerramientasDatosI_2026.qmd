@@ -214,25 +214,6 @@ resumen_canciones
 ```
 
 ```{r}
-# Se calculan las estadísticas de altura de cada canción.
-resumen_canciones <- f0_canciones |>
-  summarise(
-    ventanas_con_sonido = sum(!is.na(hz)),
-    mediana_hz = median(hz, na.rm = TRUE),
-    minimo_hz = min(hz, na.rm = TRUE),
-    maximo_hz = max(hz, na.rm = TRUE),
-    desviacion_semitonos = sd(midi, na.rm = TRUE),
-    rango_semitonos = max(midi, na.rm = TRUE) - min(midi, na.rm = TRUE),
-    rango_central_semitonos = quantile(midi, 0.95, na.rm = TRUE) -
-      quantile(midi, 0.05, na.rm = TRUE),
-    .by = cancion
-  )
-
-resumen_canciones
-
-```
-
-```{r}
 #| label: fig-trayectoria
 #| fig-cap: "Evolución temporal de la altura estimada en cada fragmento. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
