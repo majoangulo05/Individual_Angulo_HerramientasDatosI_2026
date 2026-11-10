@@ -147,22 +147,67 @@ onda.canciones |>
 ```
 
 ```{r}
-#| label: fig-espectrograma-prueba
-#| fig-cap: "Espectrograma exploratorio de Recuérdame. Fuente: grabación propia."
-#| fig-width: 7
-#| fig-height: 4
+#| label: datos-espectrograma
+#| include: false
 
-# Primera prueba de la longitud de ventana.
-seewave::spectro(
-  audio.recuerdame,
-  wl = 4096,
-  ovlp = 0,
-  flim = c(0, 3),
-  tlab = "Tiempo (segundos)",
-  flab = "Frecuencia (kHz)",
-  scalelab = "Nivel relativo (dB)"
+# Calcula el espectrograma de una grabación y lo devuelve como tabla:
+# una fila por cada combinación de tiempo y frecuencia.
+tabla.espectro <- function(audio, cancion) {
+  espectro <- seewave::spectro(
+    audio,
+    wl = 4096,
+    ovlp = 75,
+    flim = c(0, 3),
+    plot = FALSE
+  )
+
+  expand_grid(
+    tiempo = (seq_along(espectro$time) - 1) * 1024 / audio@samp.rate,
+    frecuencia = espectro$freq
+  ) |>
+    mutate(
+      cancion = cancion,
+      nivel = pmax(as.vector(espectro$amp), -60)
+    )
+}
+
+# Se aplica la función a las dos grabaciones y se unen los resultados.
+espectro.canciones <- bind_rows(
+  tabla.espectro(audio.recuerdame, "Recuérdame"),
+  tabla.espectro(audio.wish, "When You Wish Upon a Star")
 )
 ```
+
+```{r}
+#| label: fig-espectrograma
+#| fig-cap: "Espectrograma de cada grabación. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3.5
+
+# Se grafica el espectrograma, un panel por canción.
+espectro.canciones |>
+  ggplot(aes(x = tiempo, y = frecuencia, fill = nivel)) +
+  geom_raster() +
+  facet_wrap(vars(cancion), ncol = 2, scales = "free_x") +
+  scale_fill_viridis_c(option = "magma", name = "Nivel (dB)") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "Tiempo (segundos)", y = "Frecuencia (kHz)") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
+
+
+
+
+
+
+
+
+
 
 ```{r}
 # Se estima la frecuencia fundamental de Recuérdame con soundgen,
