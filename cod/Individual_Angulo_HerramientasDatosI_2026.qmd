@@ -231,7 +231,6 @@ Para cada fragmento se calcularon la mediana de la frecuencia, que indica el reg
 **Centro de la melodía.** Aunque *When You Wish Upon a Star* contiene la nota más aguda de todas (Re6), su mediana es más baja: 542.9 Hz, entre Do5 y Do#5, unos 3.5 semitonos por debajo de la de *Recuérdame* (663.2 Hz, cerca de Mi5). El máximo indica hasta dónde llega una melodía; la mediana, dónde permanece. Los extremos estimados coinciden con las partituras (de Fa#4 a Si5 y de Mi4 a Re6), lo que respalda las medidas de la tabla.
 
 
-
 ```{r}
 #| label: resumen-canciones
 #| include: false
@@ -318,6 +317,8 @@ zonas.canciones |>
   style_tt(i = 0, bold = TRUE)
 ```
 
+**Zonas del registro.** Para ver dónde pasa el tiempo cada melodía, el registro de las dos partituras, de Mi4 a Re6, se dividió en tres zonas de igual tamaño, y cada ventana se clasificó en una de ellas (@tbl-zonas). *When You Wish Upon a Star* reparte su tiempo casi por igual entre las tres: 34 % en la grave, 34 % en la media y 32 % en la aguda. *Recuérdame*, en cambio, se concentra en la zona media, donde pasa el 63 % del tiempo con sonido, y usa poco los extremos. Esto explica dos resultados de la @tbl-resumen. La mediana de *Recuérdame* es más alta porque la melodía casi no baja, no porque sea más aguda en general. Y la desviación estándar de *When You Wish Upon a Star* es mayor porque su tiempo se divide entre todo el registro.
+
 **Evolución temporal.** La @fig-trayectoria muestra la altura estimada en cada ventana; los puntos rojos señalan la nota más grave y la más aguda de cada fragmento. Las dos melodías tienen formas distintas. *Recuérdame* sube y baja varias veces dentro de una misma franja, casi siempre entre La4 y La5, con frases cortas que regresan a notas cercanas. Solo desciende por debajo de La4 una vez, antes del segundo 5, cuando llega a Fa#4, y alcanza su nota más aguda, Si5, cerca del segundo 13. *When You Wish Upon a Star* tiene dos partes. En los primeros diez segundos sube poco a poco desde Mi4, su nota más grave, y se detiene en dos notas largas, Do5 y Si4. Después describe un gran arco: asciende hasta Re6, poco después del segundo 20, y vuelve a bajar hasta terminar en Do5. En esa segunda parte hay además saltos de una octava entre notas seguidas, de Sol4 a Sol5 y de Si4 a Si5. Los tramos sin puntos son silencios o ventanas en las que no se pudo estimar una nota.
 
 ```{r}
@@ -386,6 +387,13 @@ f0.canciones |>
 #| fig-width: 7
 #| fig-height: 3.8
 
+# Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
+distribucion.notas <- f0.canciones |>
+  drop_na(midi) |>
+  mutate(nota = round(midi)) |>
+  count(cancion, nota) |>
+  mutate(porcentaje = 100 * n / sum(n), .by = cancion)
+
 # Se grafica la distribución, un panel por canción. Se etiquetan las barras
 # que superan el 10 % del tiempo con sonido.
 distribucion.notas |>
@@ -424,7 +432,7 @@ distribucion.notas |>
     title = "Recuérdame pasa casi la mitad del tiempo en dos notas",
     subtitle = "Porcentaje del tiempo con sonido en cada nota; se excluyen los silencios",
     x = "Altura (nota)",
-    y = "Tiempo con sonido (%)"
+    y = "Tiempo con sonido"
   ) +
   theme_minimal(base_size = 12, base_family = "Georgia") +
   theme(
