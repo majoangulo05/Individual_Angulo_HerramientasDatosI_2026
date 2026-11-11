@@ -235,6 +235,36 @@ f0.canciones <- bind_rows(
 )
 ```
 
+# Introducción 
+
+El sonido de un instrumento musical es una señal que puede grabarse y analizarse como datos. Cuando se toca una nota, la cuerda vibra a varias frecuencias a la vez. La más baja se llama frecuencia fundamental y determina la altura de la nota; las demás, llamadas armónicos son múltiplos de ella (Wolfe, s.f.-b). Por ejemplo, la nota La4 corresponde a 440 Hz, es decir, 440 vibraciones por segundo (Wolfe, s.f.-a). Estimar esa frecuencia a lo largo de una grabación permite describir una melodía con números: qué tan grave o aguda es, cuánto registro abarca y cómo se mueve en el tiempo. 
+
+Este trabajo aplica esa idea a dos fragmentos interpretados y grabados en violín: *Recuérdame*, de la película *Coco*, y *When You Wish Upon a Star*, de *Pinocho*. Se analiza desde dos perspectivas. Por un lado, permite compara de forma objetiva dos melodías que al oído se pueden percibir distintas. Por otro, recorre con datos propios el flujo de trabajo completo del curso: obtenerlos, procesarlos, validarlos y comunicarlos de forma reproducible en R. 
+
+# Objetivo 
+
+Comparar el rango, la distribución y la evolución temporal de la altura musical en dos fragmentos interpretados en violín, *Recuerdame* y *When You Wish Upon a Star*, a partir de la estimación de su frecuencia fundamental con herramientas de procesamiento y visualización de datos en R. 
+
+# Metodología
+
+**Datos.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
+
+Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de 48 000 Hz. De *Recuérdame* se grabaron los compases 1 a 10 (28.3 segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (33.5 segundos). Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete `av` (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete `tuneR`, del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
+
+**Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función `analyze()` del paquete `soundgen` (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
+
+Antes de elegir este método se probaron otros dos, del paquete `seewave` (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star*.
+
+**Escala de semitonos y medidas de comparación.** Las frecuencias estimadas se convirtieron a la escala MIDI, en la que cada nota recibe un número y cada semitono vale una unidad (Wolfe, s.f.-a):
+
+$$m = 69 + 12 \log_2\left(\frac{f}{440}\right)$$
+
+donde $f$ es la frecuencia en Hz y 69 es el número de la nota La4. Se usó esta escala porque en Hz la distancia entre dos notas depende de qué tan agudas sean, mientras que en semitonos un mismo intervalo musical vale siempre lo mismo.
+
+Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana. Los cálculos y los gráficos se hicieron con los paquetes del `tidyverse` (Wickham et al., 2019).
+
+
+
 ```{r}
 #| label: resumen-canciones
 
@@ -321,9 +351,21 @@ distribucion.notas |>
   )
 ```
 
+# Bibliografía {.unnumbered}
 
+Ligges, U., Krey, S., Mersmann, O., y Schnackenberg, S. (2023). *tuneR: Analysis of music and speech* [Paquete de R]. https://CRAN.R-project.org/package=tuneR
 
+Müller, M., y Zunner, T. (s.f.). *Waves and waveforms*. FMP Notebooks, International Audio Laboratories Erlangen. https://audiolabs-erlangen.de/resources/MIR/FMP/C1/C1S3_Waveform.html
 
+Ooms, J. (2025). *av: Working with audio and video in R* (versión 0.9.6) [Paquete de R]. https://doi.org/10.32614/CRAN.package.av
+
+R Core Team. (2026). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing. https://www.R-project.org/
+
+Tiberius, C. (2025). Discrete Fourier transform. En *MUDE textbook*. Delft University of Technology. https://mude.citg.tudelft.nl/book/2025/signal/dft.html
+
+Wolfe, J. (s.f.-a). *Note names, MIDI numbers and frequencies*. School of Physics, University of New South Wales. https://newt.phys.unsw.edu.au/jw/notes.html
+
+Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, University of New South Wales. https://newt.phys.unsw.edu.au/jw/strings.html
 
 
 
