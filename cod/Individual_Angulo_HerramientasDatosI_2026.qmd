@@ -49,6 +49,7 @@ library(tuneR)     # lectura de archivos WAV
 library(seewave)   # espectrograma
 library(soundgen)  # estimación de la frecuencia fundamental
 library(tidyverse) # manipulación de datos y gráficos e incluye ggplot2
+library(tinytable) # tablas del informe
 ```
 
 ```{r}
@@ -225,11 +226,15 @@ Para cada fragmento se calcularon la mediana de la frecuencia, que indica el reg
 
 # Resultados 
 
+**Registro y rango.** La @tbl-resumen reúne las medidas de altura de los dos fragmentos. La primera diferencia está en el rango total, que es la distancia entre la nota más grave y la más aguda: *When You Wish Upon a Star* abarca 22.1 semitonos, casi dos octavas, y *Recuérdame*, 17.2. Como el rango total depende solo de dos ventanas, se comparó con el rango central, que deja fuera el 5 % más grave y el 5 % más agudo. La diferencia es casi la misma con las dos medidas (4.9 y 5.1 semitonos), lo que indica que no se debe a unas pocas notas extremas, sino a que toda la melodía está más extendida. La desviación estándar, que toma en cuenta todas las ventanas, apunta en la misma dirección: 5.4 semitonos frente a 3.9. Es decir, *When You Wish Upon a Star* no solo llega más lejos, sino que pasa más tiempo lejos de su centro.
+
+**Centro de la melodía.** Aunque *When You Wish Upon a Star* contiene la nota más aguda de todas (Re6), su mediana es más baja: 542.9 Hz, entre Do5 y Do#5, unos 3.5 semitonos por debajo de la de *Recuérdame* (663.2 Hz, cerca de Mi5). El máximo indica hasta dónde llega una melodía; la mediana, dónde permanece. Los extremos estimados coinciden con las partituras (de Fa#4 a Si5 y de Mi4 a Re6), lo que respalda las medidas de la tabla.
 
 
 
 ```{r}
 #| label: resumen-canciones
+#| include: false
 
 # Se calculan las estadísticas de altura de cada canción.
 resumen.canciones <- f0.canciones |>
@@ -245,24 +250,117 @@ resumen.canciones <- f0.canciones |>
     .by = cancion
   )
 
-resumen.canciones
 ```
+
+```{r}
+#| label: tbl-resumen
+#| tbl-cap: "Medidas de altura de cada fragmento."
+
+# Se reorganiza el resumen: una fila por medida y una columna por canción.
+tabla.resumen <- resumen.canciones |>
+  pivot_longer(-cancion, names_to = "medida", values_to = "valor") |>
+  pivot_wider(names_from = cancion, values_from = valor) |>
+  mutate(
+    Medida = c(
+      "Ventanas con sonido",
+      "Mediana (Hz)",
+      "Mínimo (Hz)",
+      "Máximo (Hz)",
+      "Desviación estándar (semitonos)",
+      "Rango total (semitonos)",
+      "Rango central, percentiles 5 a 95 (semitonos)"
+    ),
+    .before = 1
+  ) |>
+  select(-medida)
+
+# Se da formato a la tabla para el informe.
+tabla.resumen |>
+  tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
+  format_tt(i = 1, j = 2:3, digits = 0, num_fmt = "decimal") |>
+  format_tt(i = 2:7, j = 2:3, digits = 1, num_fmt = "decimal") |>
+  style_tt(i = 0, bold = TRUE)
+```
+
+```{r}
+#| label: tbl-zonas
+#| tbl-cap: "Porcentaje del tiempo con sonido en cada zona del registro."
+
+# Las zonas dividen en tres partes iguales el registro de ambas partituras,
+# que va de Mi4 (nota 64) a Re6 (nota 86).
+orden.zonas <- c(
+  "Grave (de Mi4 a Si4)",
+  "Media (de Do5 a Fa sostenido 5)",
+  "Aguda (de Sol5 a Re6)"
+)
+
+# Se clasifica cada ventana en una zona y se calcula el porcentaje por canción.
+zonas.canciones <- f0.canciones |>
+  drop_na(midi) |>
+  mutate(
+    zona = case_when(
+      round(midi) <= 71 ~ orden.zonas[1],
+      round(midi) <= 78 ~ orden.zonas[2],
+      .default = orden.zonas[3]
+    )
+  ) |>
+  count(cancion, zona) |>
+  mutate(porcentaje = 100 * n / sum(n), .by = cancion) |>
+  select(-n) |>
+  pivot_wider(names_from = cancion, values_from = porcentaje) |>
+  arrange(match(zona, orden.zonas)) |>
+  rename(Zona = zona)
+
+# Se da formato a la tabla para el informe.
+zonas.canciones |>
+  tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
+  format_tt(j = 2:3, digits = 0, num_fmt = "decimal") |>
+  style_tt(i = 0, bold = TRUE)
+```
+
+**Evolución temporal.** La @fig-trayectoria muestra la altura estimada en cada ventana; los puntos rojos señalan la nota más grave y la más aguda de cada fragmento. Las dos melodías tienen formas distintas. *Recuérdame* sube y baja varias veces dentro de una misma franja, casi siempre entre La4 y La5, con frases cortas que regresan a notas cercanas. Solo desciende por debajo de La4 una vez, antes del segundo 5, cuando llega a Fa#4, y alcanza su nota más aguda, Si5, cerca del segundo 13. *When You Wish Upon a Star* tiene dos partes. En los primeros diez segundos sube poco a poco desde Mi4, su nota más grave, y se detiene en dos notas largas, Do5 y Si4. Después describe un gran arco: asciende hasta Re6, poco después del segundo 20, y vuelve a bajar hasta terminar en Do5. En esa segunda parte hay además saltos de una octava entre notas seguidas, de Sol4 a Sol5 y de Si4 a Si5. Los tramos sin puntos son silencios o ventanas en las que no se pudo estimar una nota.
 
 ```{r}
 #| label: fig-trayectoria
 #| fig-cap: "Evolución temporal de la altura estimada en cada fragmento. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 3.5
+#| fig-height: 4.6
+
+# Ventana más grave y más aguda de cada canción, para señalarlas en el gráfico.
+extremos.canciones <- bind_rows(
+  f0.canciones |>
+    slice_min(midi, n = 1, by = cancion, with_ties = FALSE) |>
+    mutate(etiqueta = "más grave", ajuste = 1.8),
+  f0.canciones |>
+    slice_max(midi, n = 1, by = cancion, with_ties = FALSE) |>
+    mutate(etiqueta = "más aguda", ajuste = -0.9)
+)
 
 # Se grafica la altura estimada a lo largo del tiempo, un panel por canción.
 f0.canciones |>
   drop_na(midi) |>
   ggplot(aes(x = tiempo, y = midi)) +
   geom_point(size = 0.5, alpha = 0.6, colour = "#315F78") +
+  geom_point(data = extremos.canciones, colour = "#C0392B", size = 2) +
+  geom_text(
+    data = extremos.canciones,
+    aes(label = etiqueta),
+    vjust = extremos.canciones$ajuste,
+    hjust = "inward",
+    colour = "#C0392B",
+    family = "Georgia",
+    size = 3
+  ) +
   facet_wrap(vars(cancion), ncol = 2) +
+  scale_x_continuous(breaks = seq(0, 35, 5)) +
   scale_y_continuous(
-    breaks = c(64, 69, 74, 79, 84),
-    labels = c("Mi4", "La4", "Re5", "Sol5", "Do6")
+    breaks = c(64, 66, 67, 68, 69, 71, 72, 73, 74, 76, 77, 78, 79, 81, 83, 84, 86),
+    labels = c(
+      "Mi4", "Fa#4", "Sol4", "Sol#4", "La4", "Si4", "Do5", "Do#5", "Re5",
+      "Mi5", "Fa5", "Fa#5", "Sol5", "La5", "Si5", "Do6", "Re6"
+    ),
+    minor_breaks = NULL,
+    limits = c(62, 88)
   ) +
   labs(
     title = "When You Wish Upon a Star recorre un registro más amplio",
@@ -273,32 +371,54 @@ f0.canciones |>
   theme_minimal(base_size = 12, base_family = "Georgia") +
   theme(
     panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(linewidth = 0.25),
+    axis.text.y = element_text(size = 7),
     plot.title.position = "plot",
     strip.text = element_text(face = "bold")
   )
 ```
 
+**Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, todas de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Esto se relaciona con lo vista en la distribución de las canciones entre bloque grave, media, aguda. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
+
 ```{r}
 #| label: fig-distribucion
-#| fig-cap: "Distribución del tiempo con sonido por nota en cada fragmento. Fuente: elaboración propia con grabaciones propias."
+#| fig-cap: "Distribución del tiempo con sonido por nota en cada fragmento. Los números indican el porcentaje de las notas que superan el 10 %; las líneas punteadas separan las zonas grave, media y aguda. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 3.5
+#| fig-height: 3.8
 
-# Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
-distribucion.notas <- f0.canciones |>
-  drop_na(midi) |>
-  mutate(nota = round(midi)) |>
-  count(cancion, nota) |>
-  mutate(porcentaje = 100 * n / sum(n), .by = cancion)
-
-# Se grafica la distribución, un panel por canción.
+# Se grafica la distribución, un panel por canción. Se etiquetan las barras
+# que superan el 10 % del tiempo con sonido.
 distribucion.notas |>
   ggplot(aes(x = nota, y = porcentaje)) +
   geom_col(fill = "#315F78") +
+  geom_text(
+    data = distribucion.notas |> filter(porcentaje >= 10),
+    aes(label = round(porcentaje)),
+    vjust = -0.4,
+    size = 2.8,
+    family = "Georgia",
+    colour = "grey20"
+  ) +
+  geom_vline(
+    xintercept = c(71.5, 78.5),
+    linetype = "dashed",
+    colour = "grey40",
+    linewidth = 0.3
+  ) +
   facet_wrap(vars(cancion), ncol = 2) +
   scale_x_continuous(
-    breaks = c(64, 69, 74, 79, 84),
-    labels = c("Mi4", "La4", "Re5", "Sol5", "Do6")
+    breaks = c(64, 66, 67, 68, 69, 71, 72, 73, 74, 76, 77, 78, 79, 81, 83, 84, 86),
+    labels = c(
+      "Mi4", "Fa#4", "Sol4", "Sol#4", "La4", "Si4", "Do5", "Do#5", "Re5",
+      "Mi5", "Fa5", "Fa#5", "Sol5", "La5", "Si5", "Do6", "Re6"
+    ),
+    minor_breaks = NULL,
+    limits = c(62, 88)
+  ) +
+   scale_y_continuous(
+    breaks = seq(0, 30, 5),
+    labels = function(x) paste0(x, " %"),
+    expand = expansion(mult = c(0, 0.12))
   ) +
   labs(
     title = "Recuérdame pasa casi la mitad del tiempo en dos notas",
@@ -309,6 +429,9 @@ distribucion.notas |>
   theme_minimal(base_size = 12, base_family = "Georgia") +
   theme(
     panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(linewidth = 0.25),
+    axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 1),
     plot.title.position = "plot",
     strip.text = element_text(face = "bold")
   )
