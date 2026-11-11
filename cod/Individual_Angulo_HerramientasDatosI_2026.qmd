@@ -23,6 +23,12 @@ editor: visual
 ```{=typst}
 #set par(justify: true)
 
+#show heading: set block(above: 1.3em, below: 0.7em)
+#show figure.caption: set text(size: 10pt)
+
+#show table: set text(hyphenate: false)
+#show table: set par(justify: false)
+
 #text(weight: "bold")[Universidad de Costa Rica] \
 Escuela de Matemática \
 CA-0204 --- Herramientas de Ciencia de Datos I \
@@ -208,13 +214,15 @@ Comparar el rango, la distribución y la evolución temporal de la altura musica
 
 # Metodología
 
-**Datos.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
+**Datos.** Una grabación digital es una secuencia de mediciones de la señal sonora, y el número de mediciones por segundo es su frecuencia de muestreo (Tiberius, 2025); el proceso completo se describe en el Anexo.
 
-Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de 48 000 Hz. De *Recuérdame* se grabaron los compases 1 a 10 (28.3 segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (33.5 segundos). Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete `av` (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete `tuneR`, del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
+Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de 48 000 Hz. De *Recuérdame* se grabaron los compases 1 a 10 (28.3 segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (33.5 segundos). Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete av (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete tuneR (Ligges et al., 2023), del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
 
-**Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función `analyze()` del paquete `soundgen` (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
+Como exploración inicial se graficaron la forma de onda y el espectrograma de cada grabación (@fig-onda y @fig-espectrograma, en el Anexo). La forma de onda muestra cómo cambia la amplitud en el tiempo y permite ubicar los silencios, pero no la altura de las notas. El espectrograma ya deja ver la frecuencia fundamental y sus armónicos, pero es una imagen y no permite calcular. Por eso el análisis se centró en estimar la frecuencia fundamental.
 
-Antes de elegir este método se probaron otros dos, del paquete `seewave` (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star*.
+**Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función analyze() del paquete soundgen (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
+
+Antes de elegir este método se probaron otros dos, del paquete seewave (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star*.
 
 **Escala de semitonos y medidas de comparación.** Las frecuencias estimadas se convirtieron a la escala MIDI, en la que cada nota recibe un número y cada semitono vale una unidad (Wolfe, s.f.-a):
 
@@ -222,7 +230,7 @@ $$m = 69 + 12 \log_2\left(\frac{f}{440}\right)$$
 
 donde $f$ es la frecuencia en Hz y 69 es el número de la nota La4. Se usó esta escala porque en Hz la distancia entre dos notas depende de qué tan agudas sean, mientras que en semitonos un mismo intervalo musical vale siempre lo mismo.
 
-Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana. Los cálculos y los gráficos se hicieron con los paquetes del `tidyverse` (Wickham et al., 2019).
+Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana. Los cálculos y los gráficos se hicieron con los paquetes del tidyverse (Wickham et al., 2019).
 
 # Resultados 
 
@@ -278,7 +286,8 @@ tabla.resumen |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(i = 1, j = 2:3, digits = 0, num_fmt = "decimal") |>
   format_tt(i = 2:7, j = 2:3, digits = 1, num_fmt = "decimal") |>
-  style_tt(i = 0, bold = TRUE)
+  style_tt(i = 0, bold = TRUE) |>
+  style_tt(fontsize = 0.85)
 ```
 
 ```{r}
@@ -314,7 +323,8 @@ zonas.canciones <- f0.canciones |>
 zonas.canciones |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(j = 2:3, digits = 0, num_fmt = "decimal") |>
-  style_tt(i = 0, bold = TRUE)
+  style_tt(i = 0, bold = TRUE) |>
+  style_tt(fontsize = 0.85)
 ```
 
 **Zonas del registro.** Para ver dónde pasa el tiempo cada melodía, el registro de las dos partituras, de Mi4 a Re6, se dividió en tres zonas de igual tamaño, y cada ventana se clasificó en una de ellas (@tbl-zonas). *When You Wish Upon a Star* reparte su tiempo casi por igual entre las tres: 34 % en la grave, 34 % en la media y 32 % en la aguda. *Recuérdame*, en cambio, se concentra en la zona media, donde pasa el 63 % del tiempo con sonido, y usa poco los extremos. Esto explica dos resultados de la @tbl-resumen. La mediana de *Recuérdame* es más alta porque la melodía casi no baja, no porque sea más aguda en general. Y la desviación estándar de *When You Wish Upon a Star* es mayor porque su tiempo se divide entre todo el registro.
@@ -325,7 +335,7 @@ zonas.canciones |>
 #| label: fig-trayectoria
 #| fig-cap: "Evolución temporal de la altura estimada en cada fragmento. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 4.6
+#| fig-height: 4.3
 
 # Ventana más grave y más aguda de cada canción, para señalarlas en el gráfico.
 extremos.canciones <- bind_rows(
@@ -385,7 +395,7 @@ f0.canciones |>
 #| label: fig-distribucion
 #| fig-cap: "Distribución del tiempo con sonido por nota en cada fragmento. Los números indican el porcentaje de las notas que superan el 10 %; las líneas punteadas separan las zonas grave, media y aguda. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 3.8
+#| fig-height: 3.4
 
 # Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
 distribucion.notas <- f0.canciones |>
@@ -445,6 +455,8 @@ distribucion.notas |>
   )
 ```
 
+{{< pagebreak >}}
+
 # Bibliografía {.unnumbered}
 
 Anikin, A. (2019). Soundgen: An open-source tool for synthesizing nonverbal vocalizations. *Behavior Research Methods, 51*(2), 778–792. https://doi.org/10.3758/s13428-018-1095-7
@@ -469,7 +481,11 @@ Wolfe, J. (s.f.-a). *Note names, MIDI numbers and frequencies*. School of Physic
 
 Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, University of New South Wales. https://newt.phys.unsw.edu.au/jw/strings.html
 
+{{< pagebreak >}}
+
 # Anexos {.unnumbered}
+
+**Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
 ```{r}
 #| label: fig-onda
