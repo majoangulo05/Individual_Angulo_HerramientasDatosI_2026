@@ -128,25 +128,6 @@ onda.canciones <- bind_rows(
 ```
 
 ```{r}
-#| label: fig-onda
-#| fig-cap: "Forma de onda de cada grabación. Fuente: elaboración propia con grabaciones propias."
-#| fig-width: 7
-#| fig-height: 3
-
-# Se grafica la forma de onda, un panel por canción.
-onda.canciones |>
-  ggplot(aes(x = tiempo, ymin = minimo, ymax = maximo)) +
-  geom_linerange(colour = "#315F78", linewidth = 0.3) +
-  facet_wrap(vars(cancion), ncol = 2) +
-  labs(x = "Tiempo (segundos)", y = "Amplitud (valor digital)") +
-  theme_minimal(base_size = 12, base_family = "Georgia") +
-  theme(
-    panel.grid.minor = element_blank(),
-    strip.text = element_text(face = "bold")
-  )
-```
-
-```{r}
 #| label: datos-espectrograma
 #| include: false
 
@@ -178,27 +159,6 @@ espectro.canciones <- bind_rows(
 )
 ```
 
-```{r}
-#| label: fig-espectrograma
-#| fig-cap: "Espectrograma de cada grabación. Fuente: elaboración propia con grabaciones propias."
-#| fig-width: 7
-#| fig-height: 3.5
-
-# Se grafica el espectrograma, un panel por canción.
-espectro.canciones |>
-  ggplot(aes(x = tiempo, y = frecuencia, fill = nivel)) +
-  geom_raster() +
-  facet_wrap(vars(cancion), ncol = 2, scales = "free_x") +
-  scale_fill_viridis_c(option = "magma", name = "Nivel (dB)") +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  labs(x = "Tiempo (segundos)", y = "Frecuencia (kHz)") +
-  theme_minimal(base_size = 12, base_family = "Georgia") +
-  theme(
-    panel.grid = element_blank(),
-    strip.text = element_text(face = "bold")
-  )
-```
 
 ```{r}
 #| label: estimacion-f0
@@ -237,13 +197,13 @@ f0.canciones <- bind_rows(
 
 # Introducción 
 
-El sonido de un instrumento musical es una señal que puede grabarse y analizarse como datos. Cuando se toca una nota, la cuerda vibra a varias frecuencias a la vez. La más baja se llama frecuencia fundamental y determina la altura de la nota; las demás, llamadas armónicos son múltiplos de ella (Wolfe, s.f.-b). Por ejemplo, la nota La4 corresponde a 440 Hz, es decir, 440 vibraciones por segundo (Wolfe, s.f.-a). Estimar esa frecuencia a lo largo de una grabación permite describir una melodía con números: qué tan grave o aguda es, cuánto registro abarca y cómo se mueve en el tiempo. 
+El sonido de un instrumento musical es una señal que puede grabarse y analizarse como datos. Cuando se toca una nota, la cuerda vibra a varias frecuencias a la vez. La más baja se llama frecuencia fundamental y determina la altura de la nota; las demás, llamadas armónicos, son múltiplos de ella (Wolfe, s.f.-b). Por ejemplo, la nota La4 corresponde a 440 Hz, es decir, 440 vibraciones por segundo (Wolfe, s.f.-a). Estimar esa frecuencia a lo largo de una grabación permite describir una melodía con números: qué tan grave o aguda es, cuánto registro abarca y cómo se mueve en el tiempo. 
 
-Este trabajo aplica esa idea a dos fragmentos interpretados y grabados en violín: *Recuérdame*, de la película *Coco*, y *When You Wish Upon a Star*, de *Pinocho*. Se analiza desde dos perspectivas. Por un lado, permite compara de forma objetiva dos melodías que al oído se pueden percibir distintas. Por otro, recorre con datos propios el flujo de trabajo completo del curso: obtenerlos, procesarlos, validarlos y comunicarlos de forma reproducible en R. 
+Este trabajo aplica esa idea a dos fragmentos interpretados y grabados en violín: *Recuérdame*, de la película *Coco*, y *When You Wish Upon a Star*, de *Pinocho*. Se analiza desde dos perspectivas. Por un lado, permite comparar de forma objetiva dos melodías que al oído se pueden percibir distintas. Por otro, recorre con datos propios el flujo de trabajo completo del curso: obtenerlos, procesarlos, validarlos y comunicarlos de forma reproducible en R. 
 
 # Objetivo 
 
-Comparar el rango, la distribución y la evolución temporal de la altura musical en dos fragmentos interpretados en violín, *Recuerdame* y *When You Wish Upon a Star*, a partir de la estimación de su frecuencia fundamental con herramientas de procesamiento y visualización de datos en R. 
+Comparar el rango, la distribución y la evolución temporal de la altura musical en dos fragmentos interpretados en violín, *Recuérdame* y *When You Wish Upon a Star*, a partir de la estimación de su frecuencia fundamental con herramientas de procesamiento y visualización de datos en R. 
 
 # Metodología
 
@@ -262,6 +222,9 @@ $$m = 69 + 12 \log_2\left(\frac{f}{440}\right)$$
 donde $f$ es la frecuencia en Hz y 69 es el número de la nota La4. Se usó esta escala porque en Hz la distancia entre dos notas depende de qué tan agudas sean, mientras que en semitonos un mismo intervalo musical vale siempre lo mismo.
 
 Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana. Los cálculos y los gráficos se hicieron con los paquetes del `tidyverse` (Wickham et al., 2019).
+
+# Resultados 
+
 
 
 
@@ -353,6 +316,10 @@ distribucion.notas |>
 
 # Bibliografía {.unnumbered}
 
+Anikin, A. (2019). Soundgen: An open-source tool for synthesizing nonverbal vocalizations. *Behavior Research Methods, 51*(2), 778–792. https://doi.org/10.3758/s13428-018-1095-7
+
+Anikin, A. (2026). *Acoustic analysis with soundgen*. https://cogsci.se/soundgen/acoustic_analysis.html
+
 Ligges, U., Krey, S., Mersmann, O., y Schnackenberg, S. (2023). *tuneR: Analysis of music and speech* [Paquete de R]. https://CRAN.R-project.org/package=tuneR
 
 Müller, M., y Zunner, T. (s.f.). *Waves and waveforms*. FMP Notebooks, International Audio Laboratories Erlangen. https://audiolabs-erlangen.de/resources/MIR/FMP/C1/C1S3_Waveform.html
@@ -361,13 +328,58 @@ Ooms, J. (2025). *av: Working with audio and video in R* (versión 0.9.6) [Paque
 
 R Core Team. (2026). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing. https://www.R-project.org/
 
+Sueur, J., Aubin, T., y Simonis, C. (2008). Seewave: A free modular tool for sound analysis and synthesis. *Bioacoustics, 18*, 213–226.
+
 Tiberius, C. (2025). Discrete Fourier transform. En *MUDE textbook*. Delft University of Technology. https://mude.citg.tudelft.nl/book/2025/signal/dft.html
+
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L. D., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T. L., Miller, E., Bache, S. M., Müller, K., Ooms, J., Robinson, D., Seidel, D. P., Spinu, V., ... Yutani, H. (2019). Welcome to the tidyverse. *Journal of Open Source Software, 4*(43), 1686. https://doi.org/10.21105/joss.01686
 
 Wolfe, J. (s.f.-a). *Note names, MIDI numbers and frequencies*. School of Physics, University of New South Wales. https://newt.phys.unsw.edu.au/jw/notes.html
 
 Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, University of New South Wales. https://newt.phys.unsw.edu.au/jw/strings.html
 
+# Anexos {.unnumbered}
 
+```{r}
+#| label: fig-onda
+#| fig-cap: "Forma de onda de cada grabación. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3
+
+# Se grafica la forma de onda, un panel por canción.
+onda.canciones |>
+  ggplot(aes(x = tiempo, ymin = minimo, ymax = maximo)) +
+  geom_linerange(colour = "#315F78", linewidth = 0.3) +
+  facet_wrap(vars(cancion), ncol = 2) +
+  labs(x = "Tiempo (segundos)", y = "Amplitud (valor digital)") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
+
+```{r}
+#| label: fig-espectrograma
+#| fig-cap: "Espectrograma de cada grabación. Fuente: elaboración propia con grabaciones propias."
+#| fig-width: 7
+#| fig-height: 3.5
+
+# Se grafica el espectrograma, un panel por canción.
+espectro.canciones |>
+  ggplot(aes(x = tiempo, y = frecuencia, fill = nivel)) +
+  geom_raster() +
+  facet_wrap(vars(cancion), ncol = 2, scales = "free_x") +
+  scale_fill_viridis_c(option = "magma", name = "Nivel (dB)") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "Tiempo (segundos)", y = "Frecuencia (kHz)") +
+  theme_minimal(base_size = 12, base_family = "Georgia") +
+  theme(
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold")
+  )
+```
 
 
 
