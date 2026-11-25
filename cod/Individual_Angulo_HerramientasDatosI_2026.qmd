@@ -21,13 +21,25 @@ editor: visual
 ---
 
 ```{=typst}
+#let azul = rgb("#315F78")
+
 #set par(justify: true)
 
 #show heading: set block(above: 1.3em, below: 0.7em)
+#show heading: set text(fill: azul)
 #show figure.caption: set text(size: 10pt)
 
 #show table: set text(hyphenate: false)
 #show table: set par(justify: false)
+
+#set page(header: context {
+  if counter(page).get().first() > 1 [
+    #set text(size: 9pt, fill: luma(110))
+    Análisis acústico de dos melodías en violín #h(1fr) Angulo Salas
+    #v(-0.6em)
+    #line(length: 100%, stroke: 0.4pt + luma(170))
+  ]
+})
 
 #text(weight: "bold")[Universidad de Costa Rica] \
 Escuela de Matemática \
@@ -35,14 +47,16 @@ CA-0204 --- Herramientas de Ciencia de Datos I \
 II ciclo, 2026
 
 #v(0.5em)
-#text(size: 17pt, weight: "bold")[Análisis acústico de dos melodías en violín] \
+#text(size: 17pt, weight: "bold", fill: azul)[Análisis acústico de dos melodías en violín] \
 #text(weight: "bold")[Proyecto individual --- Informe de resultados]
 
 #v(0.3em)
 María José Angulo Salas
 
 26 de noviembre de 2026
-#v(0.8em)
+#v(0.2em)
+#line(length: 100%, stroke: 1pt + azul)
+#v(0.4em)
 ```
 
 ```{r}
@@ -218,7 +232,7 @@ Comparar el rango, la distribución y la evolución temporal de la altura musica
 
 Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de 48 000 Hz. De *Recuérdame* se grabaron los compases 1 a 10 (28.3 segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (33.5 segundos). Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete av (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete tuneR (Ligges et al., 2023), del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
 
-Como exploración inicial se graficaron la forma de onda y el espectrograma de cada grabación (@fig-onda y @fig-espectrograma, en el Anexo). La forma de onda muestra cómo cambia la amplitud en el tiempo y permite ubicar los silencios, pero no la altura de las notas. El espectrograma ya deja ver la frecuencia fundamental y sus armónicos, pero es una imagen y no permite calcular. Por eso el análisis se centró en estimar la frecuencia fundamental.
+Como exploración inicial se graficaron la forma de onda y el espectrograma de cada grabación (@fig-onda y @fig-espectrograma, en el Anexo). Ninguno permite comparar las alturas con números, por lo que el análisis se centró en estimar la frecuencia fundamental.
 
 **Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función analyze() del paquete soundgen (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
 
@@ -230,7 +244,8 @@ $$m = 69 + 12 \log_2\left(\frac{f}{440}\right)$$
 
 donde $f$ es la frecuencia en Hz y 69 es el número de la nota La4. Se usó esta escala porque en Hz la distancia entre dos notas depende de qué tan agudas sean, mientras que en semitonos un mismo intervalo musical vale siempre lo mismo.
 
-Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana. Los cálculos y los gráficos se hicieron con los paquetes del tidyverse (Wickham et al., 2019).
+Para cada fragmento se calcularon la mediana de la frecuencia, que indica el registro en que se mueve la melodía; la desviación estándar de la altura, que mide su variabilidad; y el rango, tanto total (de la nota más grave a la más aguda) como central (entre los percentiles 5 y 95), que es menos sensible a ventanas mal estimadas. La distribución se describió con el porcentaje del tiempo con sonido que ocupa cada nota, y la evolución temporal, con la altura estimada en cada ventana.
+Como los fragmentos duran distinto, se compararon medidas que no dependen de la cantidad de ventanas. Los cálculos y los gráficos se hicieron con los paquetes del tidyverse (Wickham et al., 2019).
 
 # Resultados 
 
@@ -286,7 +301,8 @@ tabla.resumen |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(i = 1, j = 2:3, digits = 0, num_fmt = "decimal") |>
   format_tt(i = 2:7, j = 2:3, digits = 1, num_fmt = "decimal") |>
-  style_tt(i = 0, bold = TRUE) |>
+    style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
+  style_tt(i = c(2, 4, 6), background = "#EEF3F6") |>
   style_tt(fontsize = 0.85)
 ```
 
@@ -323,7 +339,8 @@ zonas.canciones <- f0.canciones |>
 zonas.canciones |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(j = 2:3, digits = 0, num_fmt = "decimal") |>
-  style_tt(i = 0, bold = TRUE) |>
+    style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
+  style_tt(i = 2, background = "#EEF3F6") |>
   style_tt(fontsize = 0.85)
 ```
 
@@ -335,7 +352,7 @@ zonas.canciones |>
 #| label: fig-trayectoria
 #| fig-cap: "Evolución temporal de la altura estimada en cada fragmento. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 4.3
+#| fig-height: 3.8
 
 # Ventana más grave y más aguda de cada canción, para señalarlas en el gráfico.
 extremos.canciones <- bind_rows(
@@ -393,10 +410,9 @@ f0.canciones |>
 
 ```{r}
 #| label: fig-distribucion
-#| fig-cap: "Distribución del tiempo con sonido por nota en cada fragmento. Los números indican el porcentaje de las notas que superan el 10 %; las líneas punteadas separan las zonas grave, media y aguda. Fuente: elaboración propia con grabaciones propias."
+#| fig-cap: "Porcentaje del tiempo con sonido por nota. Los números marcan las notas sobre el 10 %; las líneas punteadas separan las zonas. Fuente: elaboración propia con grabaciones propias."
 #| fig-width: 7
-#| fig-height: 3.4
-
+#| fig-height: 2.9
 # Se calcula qué porcentaje del tiempo con sonido ocupa cada nota.
 distribucion.notas <- f0.canciones |>
   drop_na(midi) |>
