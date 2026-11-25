@@ -1,28 +1,40 @@
-# Análisis acústico de melodías interpretadas en violín mediante R
+# Análisis acústico de dos melodías en violín
+
+Proyecto individual del curso CA-0204 Herramientad de Ciencia de Datos, Herramientas de Ciencia de Datos I, Universidad de Costa Rica, II ciclo 2026.
 
 ## Descripción
 
-Este proyecto individual del curso Herramientas de Ciencia de Datos I de la Universidad de Costa Rica tiene como objetivo analizar y comparar las características acústicas de diferentes melodías interpretadas en violín.
+Se compara el rango, la distribución y la evolución temporal de la altura musical en dos fragmentos interpretados y grabados en violín:
+**Recuérdame** y **When You Wish Upon a Star**. 
 
-Se utilizarán grabaciones propias para estudiar la frecuencia fundamental, el rango melódico y la variabilidad de las frecuencias mediante herramientas de análisis de sonido y visualización de datos en R.
+En cada grabación se estima la frecuencia fundamental cada 0.025 segundos por autocorrelación, se valida las partituras y se convierte a semitonos (escala MIDI) para comparar las dos melodías con tablas y gráficos.
+
+## Estructura del proyecto
+- `cod/`: Documento Quarto con el código y el informe.
+- `data/`: Grabaciones originales en formato M4A
+- `info/`: Documentación y registro de las pruebas del método
+- `config/`: Parámetros del análisis
+- `res/`: Gráficos generados para presentación y el pdf
+
+## Requisitos
+
+- R 4.4 o superior y RStudio.
+- Quarto, con salida a PDF mediante Typst (incluido en Quarto).
+- Paquetes de R. Se instalan una sola vez desde la consola:
+
+```r
+install.packages(c("av", "tuneR", "seewave", "soundgen", "tidyverse", "tinytable", "ragg"))
+```
+## Cómo reproducir el análisis
+
+1. Clonar o descargar este repositorio.
+2. Abrir `Individual_Angulo_HerramientasDatosI_2026.Rproj` en RStudio.
+3. Abrir `cod/Individual_Angulo_HerramientasDatosI_2026.qmd`.
+4. Presionar **Render**. El documento convierte los audios a WAV, estima las frecuencias y genera el informe en PDF.
 
 ## Herramientas
 
-- R y RStudio.
-- Git y GitHub.
-- Quarto para la elaboración del informe.
-- Paquetes previstos: tuneR, seewave, tidyverse y ggplot2.
-
-## Estructura del proyecto
-
-- `cod/`: código de R y archivos Quarto.
-- `data/`: grabaciones y datos originales.
-- `info/`: documentación y referencias.
-- `config/`: parámetros de configuración.
-- `res/`: gráficos, tablas e informes generados.
-
-## Estado del proyecto
-
-En desarrollo. Pendientes las grabaciones, el análisis acústico y el informe final.
-
-Las instrucciones para reproducir el análisis se agregarán una vez implementado el código.
+- **R** y **RStudio**: lenguaje y entorno de análisis.
+- **Quarto**: informe reproducible.
+- **Git y GitHub**: control de versiones.
+- Paquetes: `av` (conversión de audio), `tuneR` (lectura de WAV), `seewave` (espectrograma), `soundgen` (estimación de la frecuencia fundamental), `tidyverse` (datos y gráficos) y `tinytable` (tablas).
