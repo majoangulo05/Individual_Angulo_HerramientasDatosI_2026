@@ -222,7 +222,7 @@ Como exploración inicial se graficaron la forma de onda y el espectrograma de c
 
 **Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función analyze() del paquete soundgen (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
 
-Antes de elegir este método se probaron otros dos, del paquete seewave (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star*.
+Antes de elegir este método se probaron otros dos, del paquete seewave (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star* (@fig-partitura-recuerdame y @fig-partitura-wish, en el Anexo).
 
 **Escala de semitonos y medidas de comparación.** Las frecuencias estimadas se convirtieron a la escala MIDI, en la que cada nota recibe un número y cada semitono vale una unidad (Wolfe, s.f.-a):
 
@@ -463,6 +463,10 @@ Anikin, A. (2019). Soundgen: An open-source tool for synthesizing nonverbal voca
 
 Anikin, A. (2026). *Acoustic analysis with soundgen*. https://cogsci.se/soundgen/acoustic_analysis.html
 
+Carrillo, S. [Stefanny Suzuki]. (2019, 2 de septiembre). *Recuérdame - Coco. En D mayor para niños y principiantes* [Video]. YouTube. https://www.youtube.com/watch?v=ZoXHtAYER7A
+
+GMS Easy Violin. (2021, 17 de abril). *[Free Sheet] Disney Opening Theme || When You Wish Upon A Star || Violin Sheet Music* [Video]. YouTube. https://www.youtube.com/watch?v=SX1lPt5uiM8
+
 Ligges, U., Krey, S., Mersmann, O., y Schnackenberg, S. (2023). *tuneR: Analysis of music and speech* [Paquete de R]. https://CRAN.R-project.org/package=tuneR
 
 Müller, M., y Zunner, T. (s.f.). *Waves and waveforms*. FMP Notebooks, International Audio Laboratories Erlangen. https://audiolabs-erlangen.de/resources/MIR/FMP/C1/C1S3_Waveform.html
@@ -528,7 +532,9 @@ espectro.canciones |>
   )
 ```
 
+![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
 
+![Compases 20 a 45 de *When You Wish Upon a Star*; los corchetes marcan los compases interpretados (22 a 25 y 34 a 41). Fuente: GMS Easy Violin (2021).](../info/partitura_wish.png){#fig-partitura-wish width="100%"}
 
 
 
