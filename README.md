@@ -1,6 +1,6 @@
 # Análisis acústico de dos melodías en violín
 
-Proyecto individual del curso CA-0204 Herramientas de Ciencia de Datos, Universidad de Costa Rica, II ciclo 2026.
+Proyecto individual del curso CA-0204 Herramientas de Ciencia de Datos I, Universidad de Costa Rica, II ciclo 2026.
 
 **Autora:** María José Angulo Salas
 
