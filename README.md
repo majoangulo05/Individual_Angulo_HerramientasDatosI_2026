@@ -25,7 +25,7 @@ En cada grabación se estima la frecuencia fundamental cada 0.025 segundos por a
 - Paquetes de R. Se instalan una sola vez desde la consola:
 
 ```r
-install.packages(c("av", "tuneR", "seewave", "soundgen", "tidyverse", "tinytable", "ragg"))
+install.packages(c("av", "tuneR", "soundgen", "tidyverse", "tinytable", "ragg"))
 ```
 ## Cómo reproducir el análisis
 

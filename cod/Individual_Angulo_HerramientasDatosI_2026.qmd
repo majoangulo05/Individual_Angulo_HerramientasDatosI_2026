@@ -77,7 +77,6 @@ María José Angulo Salas \
 # Paquetes que se usan a lo largo del código.
 library(av)        # conversión de audio a WAV
 library(tuneR)     # lectura de archivos WAV
-library(seewave)   # espectrograma
 library(soundgen)  # estimación de la frecuencia fundamental
 library(tidyverse) # manipulación de datos y gráficos e incluye ggplot2
 library(tinytable) # tablas del informe
@@ -128,68 +127,6 @@ caracteristicas.audio <- tibble(
 
 ```
 
-```{r}
-#| label: resumen-onda
-#| include: false
-
-# Resume la forma de onda de una grabación: divide las muestras en unos
-# 2500 intervalos y obtiene la amplitud mínima y máxima de cada uno.
-resumir.onda <- function(audio, cancion) {
-  muestras.bloque <- ceiling(length(audio@left) / 2500)
-  num.bloques <- length(audio@left) %/% muestras.bloque
-
-  bloques <- matrix(
-    audio@left[seq_len(num.bloques * muestras.bloque)],
-    nrow = muestras.bloque
-  )
-
-  tibble(
-    cancion = cancion,
-    tiempo = (seq_len(num.bloques) - 0.5) * muestras.bloque / audio@samp.rate,
-    minimo = apply(bloques, 2, min),
-    maximo = apply(bloques, 2, max)
-  )
-}
-
-# Se aplica la función a las dos grabaciones y se unen los resultados.
-onda.canciones <- bind_rows(
-  resumir.onda(audio.recuerdame, "Recuérdame"),
-  resumir.onda(audio.wish, "When You Wish Upon a Star")
-)
-```
-
-```{r}
-#| label: datos-espectrograma
-#| include: false
-
-# Calcula el espectrograma de una grabación y lo devuelve como tabla:
-# una fila por cada combinación de tiempo y frecuencia.
-tabla.espectro <- function(audio, cancion) {
-  espectro <- seewave::spectro(
-    audio,
-    wl = 4096,
-    ovlp = 75,
-    flim = c(0, 3),
-    plot = FALSE
-  )
-
-  expand_grid(
-    tiempo = (seq_along(espectro$time) - 1) * 1024 / audio@samp.rate,
-    frecuencia = espectro$freq
-  ) |>
-    mutate(
-      cancion = cancion,
-      nivel = pmax(as.vector(espectro$amp), -60)
-    )
-}
-
-# Se aplica la función a las dos grabaciones y se unen los resultados.
-espectro.canciones <- bind_rows(
-  tabla.espectro(audio.recuerdame, "Recuérdame"),
-  tabla.espectro(audio.wish, "When You Wish Upon a Star")
-)
-```
-
 
 ```{r}
 #| label: estimacion-f0
@@ -226,6 +163,29 @@ f0.canciones <- bind_rows(
 )
 ```
 
+```{r}
+#| label: validacion-notas
+#| include: false
+
+# Porcentaje de ventanas con sonido cuya nota coincide con la partitura:
+# en Recuérdame, notas de Re mayor sin octava; en When You Wish Upon a Star,
+# las 17 notas escritas en los compases tocados, con su octava.
+notas.re.mayor <- c(2, 4, 6, 7, 9, 11, 1)  # Re, Mi, Fa#, Sol, La, Si, Do#
+notas.wish <- c(64, 66, 67, 68, 69, 71, 72, 73, 74, 76, 77, 78, 79, 81, 83, 84, 86)
+
+validacion.notas <- f0.canciones |>
+  drop_na(midi) |>
+  mutate(
+    nota = round(midi),
+    coincide = if_else(
+      cancion == "Recuérdame",
+      nota %% 12 %in% notas.re.mayor,
+      nota %in% notas.wish
+    )
+  ) |>
+  summarise(porcentaje = 100 * mean(coincide), .by = cancion)
+```
+
 # Introducción 
 
 El sonido de un instrumento musical es una señal que puede grabarse y analizarse como datos. Cuando se toca una nota, la cuerda vibra a varias frecuencias a la vez. La más baja se llama frecuencia fundamental y determina la altura de la nota; las demás, llamadas armónicos, son múltiplos de ella (Wolfe, s.f.-b). Por ejemplo, la nota La4 corresponde a 440 Hz, es decir, 440 vibraciones por segundo (Wolfe, s.f.-a). Estimar esa frecuencia a lo largo de una grabación permite describir una melodía con números: qué tan grave o aguda es, cuánto registro abarca y cómo se mueve en el tiempo. 
@@ -242,11 +202,10 @@ Comparar el rango, la distribución y la evolución temporal de la altura musica
 
 Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de `r format(caracteristicas.audio$frecuencia.muestreo[1], big.mark = " ")` Hz. De *Recuérdame* se grabaron los compases 1 a 10 (`r round(caracteristicas.audio$duracion[1], 1)` segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (`r round(caracteristicas.audio$duracion[2], 1)` segundos).Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete av (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete tuneR (Ligges et al., 2023), del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
 
-Como exploración inicial se graficaron la forma de onda y el espectrograma de cada grabación (@fig-onda y @fig-espectrograma, en el Anexo). Ninguno permite comparar las alturas con números, por lo que el análisis se centró en estimar la frecuencia fundamental.
+**Estimación de la frecuencia fundamental.** La frecuencia fundamental se estimó con la función analyze() del paquete soundgen (Anikin, 2019). Como la nota cambia a lo largo de la melodía, la función divide cada grabación en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una estima la frecuencia fundamental. Se eligió su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
 
-**Estimación de la frecuencia fundamental.** Como la nota cambia a lo largo de la melodía, cada grabación se dividió en ventanas de 0.05 segundos que avanzan cada 0.025 segundos, y en cada una se estimó la frecuencia fundamental con la función analyze() del paquete soundgen (Anikin, 2019). Se usó su método de autocorrelación, que compara la señal con una copia desplazada de sí misma: el desplazamiento con el que ambas vuelven a coincidir es la duración de un ciclo, y de ahí se obtiene la frecuencia. En cada ventana, la función calcula la autocorrelación, toma sus picos como notas candidatas, descarta las que quedan fuera de los límites indicados y no analiza las ventanas por debajo de un umbral de silencio (Anikin, 2026). Los límites se fijaron en 300 y 1250 Hz, un intervalo que contiene la nota más grave (Mi4, 330 Hz) y la más aguda (Re6, 1175 Hz) de las partituras, y se usaron los mismos parámetros en ambas grabaciones.
+Antes de elegir este método se probaron otros dos, del paquete seewave (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star* (@fig-partitura-recuerdame y @fig-partitura-wish, en el Anexo). Además, el `r round(validacion.notas$porcentaje[1], 1)` % de las ventanas con sonido de *Recuérdame* cae en notas de Re mayor, y el `r round(validacion.notas$porcentaje[2], 1)` % de las de *When You Wish Upon a Star* coincide con una nota escrita en su partitura.
 
-Antes de elegir este método se probaron otros dos, del paquete seewave (Sueur et al., 2008), que se descartaron porque sus estimaciones no coincidían con las partituras. Con el método elegido, la nota más grave y la más aguda estimadas coincidieron con las escritas: de Fa#4 a Si5 en *Recuérdame* y de Mi4 a Re6 en *When You Wish Upon a Star* (@fig-partitura-recuerdame y @fig-partitura-wish, en el Anexo).
 
 **Escala de semitonos y medidas de comparación.** Las frecuencias estimadas se convirtieron a la escala MIDI, en la que cada nota recibe un número y cada semitono vale una unidad (Wolfe, s.f.-a):
 
@@ -526,49 +485,6 @@ Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, 
 
 **Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
-```{r}
-#| label: fig-onda
-#| fig-cap: "Forma de onda de cada grabación. Fuente: elaboración propia con grabaciones propias."
-#| fig-width: 7
-#| fig-height: 3
-
-# Se grafica la forma de onda, un panel por canción.
-onda.canciones |>
-  ggplot(aes(x = tiempo, ymin = minimo, ymax = maximo)) +
-  geom_linerange(colour = "#315F78", linewidth = 0.3) +
-  facet_wrap(vars(cancion), ncol = 2) +
-  labs(x = "Tiempo (segundos)", y = "Amplitud (valor digital)") +
-  theme_minimal(base_size = 12, base_family = "Georgia") +
-  theme(
-    panel.grid.minor = element_blank(),
-    strip.text = element_text(face = "bold")
-  )
-```
-
-```{r}
-#| label: fig-espectrograma
-#| fig-cap: "Espectrograma de cada grabación. Fuente: elaboración propia con grabaciones propias."
-#| fig-width: 7
-#| fig-height: 3.5
-
-# Se grafica el espectrograma, un panel por canción.
-espectro.canciones |>
-  ggplot(aes(x = tiempo, y = frecuencia, fill = nivel)) +
-  geom_raster() +
-  facet_wrap(vars(cancion), ncol = 2, scales = "free_x") +
-  scale_fill_viridis_c(option = "magma", name = "Nivel (dB)") +
-  scale_x_continuous(expand = c(0, 0)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  labs(x = "Tiempo (segundos)", y = "Frecuencia (kHz)") +
-  theme_minimal(base_size = 12, base_family = "Georgia") +
-  theme(
-    panel.grid = element_blank(),
-    strip.text = element_text(face = "bold")
-  )
-
-# Se guarda el gráfico en res/ para la presentación.
-ggsave("../res/espectrograma.png", width = 7, height = 3.5, dpi = 300, bg = "white")
-```
 
 ![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
 
