@@ -1,3 +1,5 @@
+# Archivos que Git no guarda: temporales de R y RStudio, archivos internos
+# de Quarto y los WAV, que se generan desde el código.
 .Rhistory
 .RData
 .Rproj.user/
