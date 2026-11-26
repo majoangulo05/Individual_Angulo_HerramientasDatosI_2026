@@ -422,7 +422,7 @@ f0.canciones |>
 ggsave("../res/trayectoria.png", width = 7, height = 3.8, dpi = 300, bg = "white")
 ```
 
-**Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, todas de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Esto coincide con lo visto en las zonas grave, media y aguda de la @tbl-zonas. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
+**Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, todas de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
 
 ```{r}
 #| label: fig-distribucion
@@ -510,7 +510,7 @@ Ooms, J. (2025). *av: Working with audio and video in R* (versión 0.9.6) [Paque
 
 R Core Team. (2026). *R: A language and environment for statistical computing*. R Foundation for Statistical Computing. https://www.R-project.org/
 
-Sueur, J., Aubin, T., y Simonis, C. (2008). Seewave: A free modular tool for sound analysis and synthesis. *Bioacoustics, 18*, 213–226.
+Sueur, J., Aubin, T., y Simonis, C. (2008). Seewave: A free modular tool for sound analysis and synthesis. *Bioacoustics, 18*(2), 213–226. https://doi.org/10.1080/09524622.2008.9753600
 
 Tiberius, C. (2025). Discrete Fourier transform. En *MUDE textbook*. Delft University of Technology. https://mude.citg.tudelft.nl/book/2025/signal/dft.html
 
