@@ -20,9 +20,9 @@ Se calcula en el bloque validacion-notas del informe.
 
 - Recuérdame: está en Re mayor y todas sus notas son de esa escala, así que se comparó
   la nota de cada ventana, sin octava, con las siete notas de Re mayor
-  (Re, Mi, Fa#, Sol, La, Si, Do#). Resultado: [__ %].
+  (Re, Mi, Fa#, Sol, La, Si, Do#). Resultado: 96.9%.
 - When You Wish Upon a Star: tiene alteraciones del arreglo (Fa#4, Sol#4, Do#5, Fa#5),
   así que se comparó la nota de cada ventana, con su octava, con las 17 notas escritas
-  en los compases 22 a 25 y 34 a 41 de la partitura. Resultado: 98.3 %.
-- Las ventanas que no coinciden corresponden sobre todo a cambios de nota.
+  en los compases 22 a 25 y 34 a 41 de la partitura. Resultado: 98.3%.
+- Las ventanas que no coinciden podrían correspondeer a transiciones entre notas o errores de estimación.
 
