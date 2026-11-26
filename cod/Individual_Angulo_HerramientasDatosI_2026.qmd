@@ -51,7 +51,7 @@ II ciclo, 2026
 #text(weight: "bold")[Proyecto individual --- Informe de resultados]
 
 #v(0.3em)
-María José Angulo Salas
+María José Angulo Salas \
 
 26 de noviembre de 2026
 #v(0.2em)
@@ -63,7 +63,6 @@ María José Angulo Salas
 #| label: paquetes
 #| include: false
 
-# ------------------------------------------------------------------------------
 # Proyecto individual: Análisis acústico de dos melodías en violín
 # Curso: CA-0204 Herramientas de Ciencia de Datos I, II ciclo 2026
 # Autora: María José Angulo Salas
@@ -74,7 +73,6 @@ María José Angulo Salas
 #
 # Entrada: grabaciones originales en ../data/ (formato M4A).
 # Salida: informe en PDF con tablas y gráficos; imágenes en ../res/.
-# ------------------------------------------------------------------------------
 
 # Paquetes que se usan a lo largo del código.
 library(av)        # conversión de audio a WAV
@@ -523,6 +521,8 @@ Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, 
 {{< pagebreak >}}
 
 # Anexos {.unnumbered}
+
+**Repositorio.** El código, los datos y la documentación del proyecto están disponibles en [github.com/majoangulo05/Individual_Angulo_HerramientasDatosI_2026](https://github.com/majoangulo05/Individual_Angulo_HerramientasDatosI_2026).
 
 **Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
