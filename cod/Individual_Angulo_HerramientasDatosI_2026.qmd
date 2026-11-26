@@ -232,7 +232,7 @@ f0.canciones <- bind_rows(
 
 El sonido de un instrumento musical es una señal que puede grabarse y analizarse como datos. Cuando se toca una nota, la cuerda vibra a varias frecuencias a la vez. La más baja se llama frecuencia fundamental y determina la altura de la nota; las demás, llamadas armónicos, son múltiplos de ella (Wolfe, s.f.-b). Por ejemplo, la nota La4 corresponde a 440 Hz, es decir, 440 vibraciones por segundo (Wolfe, s.f.-a). Estimar esa frecuencia a lo largo de una grabación permite describir una melodía con números: qué tan grave o aguda es, cuánto registro abarca y cómo se mueve en el tiempo. 
 
-Este trabajo aplica esa idea a dos fragmentos interpretados y grabados en violín: *Recuérdame*, de la película *Coco*, y *When You Wish Upon a Star*, de *Pinocho*. Se analiza desde dos perspectivas. Por un lado, permite comparar de forma objetiva dos melodías que al oído se pueden percibir distintas. Por otro, recorre con datos propios el flujo de trabajo completo del curso: obtenerlos, procesarlos, validarlos y comunicarlos de forma reproducible en R. 
+Este trabajo aplica esa idea a dos fragmentos interpretados y grabados en violín: *Recuérdame*, de la película *Coco*, y *When You Wish Upon a Star*, de *Pinocho*. El interés de este análisis es doble. Por un lado, permite comparar de forma objetiva dos melodías que al oído se pueden percibir distintas. Por otro, recorre con datos propios el flujo de trabajo completo del curso: obtenerlos, procesarlos, validarlos y comunicarlos de forma reproducible en R. 
 
 # Objetivo 
 
