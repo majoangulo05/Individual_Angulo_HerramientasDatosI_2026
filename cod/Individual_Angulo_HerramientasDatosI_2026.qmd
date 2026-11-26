@@ -63,7 +63,20 @@ María José Angulo Salas
 #| label: paquetes
 #| include: false
 
-# Se empieza cargando los paquetes que se usan a lo largo del código 
+# ------------------------------------------------------------------------------
+# Proyecto individual: Análisis acústico de dos melodías en violín
+# Curso: CA-0204 Herramientas de Ciencia de Datos I, II ciclo 2026
+# Autora: María José Angulo Salas
+#
+# Propósito: estimar la frecuencia fundamental de dos grabaciones propias de
+# violín (Recuérdame y When You Wish Upon a Star) y comparar su rango, su
+# distribución y su evolución temporal.
+#
+# Entrada: grabaciones originales en ../data/ (formato M4A).
+# Salida: informe en PDF con tablas y gráficos; imágenes en ../res/.
+# ------------------------------------------------------------------------------
+
+# Paquetes que se usan a lo largo del código.
 library(av)        # conversión de audio a WAV
 library(tuneR)     # lectura de archivos WAV
 library(seewave)   # espectrograma
@@ -97,11 +110,11 @@ av_audio_convert(
 #| label: lectura-audio
 #| include: false
 
-# Se importa las dos grabaciones para los espectogramas.
+# Se importa las dos grabaciones en formato WAV.
 audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
 audio.wish <- readWave("../data/when_you_wish_toma1.wav")
 
-# Características técnicas de cada grabación
+# Características técnicas de cada grabación.
 caracteristicas.audio <- tibble(
   cancion = c("Recuérdame", "When You Wish Upon a Star"),
   frecuencia.muestreo = c(audio.recuerdame@samp.rate, audio.wish@samp.rate),
@@ -115,7 +128,6 @@ caracteristicas.audio <- tibble(
   )
 )
 
-caracteristicas.audio
 ```
 
 ```{r}
@@ -230,7 +242,7 @@ Comparar el rango, la distribución y la evolución temporal de la altura musica
 
 **Datos.** Una grabación digital es una secuencia de mediciones de la señal sonora, y el número de mediciones por segundo es su frecuencia de muestreo (Tiberius, 2025); el proceso completo se describe en el Anexo.
 
-Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de 48 000 Hz. De *Recuérdame* se grabaron los compases 1 a 10 (28.3 segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (33.5 segundos). Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete av (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete tuneR (Ligges et al., 2023), del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
+Se trabajó con dos grabaciones propias de violín, hechas con la aplicación Notas de voz de un iPhone en formato sin pérdida, en mono y con una frecuencia de muestreo de `r format(caracteristicas.audio$frecuencia.muestreo[1], big.mark = " ")` Hz. De *Recuérdame* se grabaron los compases 1 a 10 (`r round(caracteristicas.audio$duracion[1], 1)` segundos) y de *When You Wish Upon a Star*, los compases 22 a 25 y 34 a 41 (`r round(caracteristicas.audio$duracion[2], 1)` segundos).Los archivos originales, en formato M4A, se convirtieron a WAV con el paquete av (Ooms, 2025) y se leyeron en R (R Core Team, 2026) con el paquete tuneR (Ligges et al., 2023), del que se obtuvieron el número de canales, la frecuencia de muestreo y la duración de cada grabación. En la conversión se omitieron los últimos 0.2 segundos de cada archivo, menos del 1 % de su duración, porque producían un error de lectura.
 
 Como exploración inicial se graficaron la forma de onda y el espectrograma de cada grabación (@fig-onda y @fig-espectrograma, en el Anexo). Ninguno permite comparar las alturas con números, por lo que el análisis se centró en estimar la frecuencia fundamental.
 
@@ -404,6 +416,10 @@ f0.canciones |>
     plot.title.position = "plot",
     strip.text = element_text(face = "bold")
   )
+
+
+# Se guarda el gráfico en res/ para la presentación.
+ggsave("../res/trayectoria.png", width = 7, height = 3.8, dpi = 300, bg = "white")
 ```
 
 **Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, todas de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Esto coincide con lo visto en las zonas grave, media y aguda de la @tbl-zonas. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
@@ -469,6 +485,9 @@ distribucion.notas |>
     plot.title.position = "plot",
     strip.text = element_text(face = "bold")
   )
+
+# Se guarda el gráfico en res/ para la presentación.
+ggsave("../res/distribucion.png", width = 7, height = 2.9, dpi = 300, bg = "white")
 ```
 
 {{< pagebreak >}}
@@ -546,6 +565,9 @@ espectro.canciones |>
     panel.grid = element_blank(),
     strip.text = element_text(face = "bold")
   )
+
+# Se guarda el gráfico en res/ para la presentación.
+ggsave("../res/espectrograma.png", width = 7, height = 3.5, dpi = 300, bg = "white")
 ```
 
 ![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
