@@ -110,7 +110,7 @@ av_audio_convert(
 #| label: lectura-audio
 #| include: false
 
-# Se importa las dos grabaciones en formato WAV.
+# Se importan las dos grabaciones en formato WAV.
 audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
 audio.wish <- readWave("../data/when_you_wish_toma1.wav")
 
@@ -313,7 +313,7 @@ tabla.resumen |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(i = 1, j = 2:3, digits = 0, num_fmt = "decimal") |>
   format_tt(i = 2:7, j = 2:3, digits = 1, num_fmt = "decimal") |>
-    style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
+  style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
   style_tt(i = c(2, 4, 6), background = "#EEF3F6") |>
   style_tt(fontsize = 0.85)
 ```
@@ -351,7 +351,7 @@ zonas.canciones <- f0.canciones |>
 zonas.canciones |>
   tt(notes = "Fuente: elaboración propia con grabaciones propias.") |>
   format_tt(j = 2:3, digits = 0, num_fmt = "decimal") |>
-    style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
+  style_tt(i = 0, bold = TRUE, color = "white", background = "#315F78") |>
   style_tt(i = 2, background = "#EEF3F6") |>
   style_tt(fontsize = 0.85)
 ```

@@ -1,4 +1,4 @@
-#config
+# config
 
 Parámetros del análisis. Están definidos dentro de `cod/Individual_Angulo_HerramientasDatosI_2026.qmd`; aquí se documentan sus valores y el motivo de cada uno.
 
