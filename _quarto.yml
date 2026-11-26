@@ -1,6 +1,5 @@
 # Configuración del proyecto de Quarto.
-# Hace que la carpeta principal sea la raíz del proyecto, para que el informe
-# pueda usar las imágenes de info/, y limita el render al informe.
+# Limita el render al documento principal del informe.
 project:
   render:
     - cod/Individual_Angulo_HerramientasDatosI_2026.qmd
