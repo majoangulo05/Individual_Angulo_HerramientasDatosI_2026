@@ -491,6 +491,7 @@ Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, 
 
 **Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
+**Uso de intelogencia artificial** Se utilizaron ChatGpt y Claude como herramientas de apoyo para la búsqueda de referencias, el desarrollo y la revisión del código, aí como para la redacción del informe. 
 
 ![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
 
