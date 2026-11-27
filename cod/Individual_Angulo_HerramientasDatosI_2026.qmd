@@ -399,7 +399,7 @@ f0.canciones |>
 ggsave("../res/trayectoria.png", width = 7, height = 3.8, dpi = 300, bg = "white")
 ```
 
-**Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, principalmente de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
+**Distribución.** La @fig-distribucion muestra qué porcentaje del tiempo con sonido ocupa cada nota. En *Recuérdame* dominan dos notas: Fa#5 y Mi5 suman casi la mitad del tiempo (26 % y 23 %), y el resto se reparte entre pocas notas más, principalmente de la escala de Re mayor. En *When You Wish Upon a Star* ninguna nota pasa del 16 %. Las más frecuentes son Si4 y Do5, que corresponden a las dos notas largas del inicio, y hay barras a lo largo de todo el registro, incluidas las alteraciones del arreglo (Fa#4, Sol#4, Do#5 y Fa#5). Las líneas punteadas marcan las tres zonas de la @tbl-zonas: las barras más altas de *Recuérdame* se agrupan en la zona media, mientras que las de *When You Wish Upon a Star* ocupan las tres. Como cada barra mide tiempo y no cantidad de notas tocadas, una nota larga pesa más que varias notas cortas.
 
 ```{r}
 #| label: fig-distribucion
@@ -469,7 +469,7 @@ ggsave("../res/distribucion.png", width = 7, height = 2.9, dpi = 300, bg = "whit
 
 **Conclusiones**
 
-El análisis permitió cuantificar las diferencias en la altura musical de ambos fragmentos. *When You Wish Upon a Star* presenta un rango más amplio (22.1 frente a 17.2 semitonos) y una distribución aproximadamente uniforme entre las tres zonas del registro, mientras que Recuérdame concentra el 63% de su tiempo con sonido en la zona media. En cuanto a la evolución temporal, *Recuérdame* se mantiene principalmente dentro de una misma franja, mientras que *When You Wish Upon a Star* describe un arco ascendente hasta Re6 y posteriormente desciende. Estos resultados muestran cómo el análisis de datos en R permite cuantificar diferencias que pueden percibirse al escuchar ambas  melodías. 
+El análisis permitió cuantificar las diferencias en la altura musical de ambos fragmentos. *When You Wish Upon a Star* presenta un rango más amplio (22.1 frente a 17.2 semitonos) y una distribución aproximadamente uniforme entre las tres zonas del registro, mientras que Recuérdame concentra el 63 % de su tiempo con sonido en la zona media. En cuanto a la evolución temporal, *Recuérdame* se mantiene principalmente dentro de una misma franja, mientras que *When You Wish Upon a Star* describe un arco ascendente hasta Re6 y posteriormente desciende. Estos resultados muestran cómo el análisis de datos en R permite cuantificar diferencias que pueden percibirse al escuchar ambas  melodías. 
 
 {{< pagebreak >}}
 
@@ -509,7 +509,7 @@ Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, 
 
 **Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
-**Uso de inteligencia artificial** Se utilizaron ChatGPT y Claude como herramientas de apoyo para la búsqueda de referencias, el desarrollo y la revisión del código, así como para la redacción del informe. Validado por María José Angulo Salas
+**Uso de inteligencia artificial.** Se utilizaron ChatGPT y Claude como herramientas de apoyo para la búsqueda de referencias, el desarrollo y la revisión del código, así como para la redacción del informe. Validado por María José Angulo Salas.
 
 ![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
 
