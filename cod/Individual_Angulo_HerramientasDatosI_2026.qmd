@@ -111,14 +111,25 @@ av_audio_convert(
 audio.recuerdame <- readWave("../data/recuerdame_toma1.wav")
 audio.wish <- readWave("../data/when_you_wish_toma1.wav")
 
-# Características técnicas de cada grabación.
+# Se determina el numero de canales de cada grabacion.
+if (audio.recuerdame@stereo == TRUE) {
+  canales.recuerdame <- 2
+} else {
+  canales.recuerdame <- 1
+}
+
+if (audio.wish@stereo == TRUE) {
+  canales.wish <- 2
+} else {
+  canales.wish <- 1
+}
+
+# Caracteristicas tecnicas de cada grabacion.
 caracteristicas.audio <- tibble(
   cancion = c("Recuérdame", "When You Wish Upon a Star"),
-  frecuencia.muestreo = c(audio.recuerdame@samp.rate, audio.wish@samp.rate),
-  canales = c(
-    if (audio.recuerdame@stereo) 2 else 1,
-    if (audio.wish@stereo) 2 else 1
-  ),
+  frecuencia.muestreo = c(audio.recuerdame@samp.rate,
+                         audio.wish@samp.rate),
+  canales = c(canales.recuerdame, canales.wish),
   duracion = c(
     length(audio.recuerdame@left) / audio.recuerdame@samp.rate,
     length(audio.wish@left) / audio.wish@samp.rate
@@ -172,20 +183,26 @@ f0.canciones <- bind_rows(
 # Porcentaje de ventanas con sonido cuya nota coincide con la partitura:
 # en Recuérdame, notas de Re mayor sin octava; en When You Wish Upon a Star,
 # las 17 notas escritas en los compases tocados, con su octava.
-notas.re.mayor <- c(2, 4, 6, 7, 9, 11, 1)  # Re, Mi, Fa#, Sol, La, Si, Do#
-notas.wish <- c(64, 66, 67, 68, 69, 71, 72, 73, 74, 76, 77, 78, 79, 81, 83, 84, 86)
+# Notas de Re mayor dentro del intervalo analizado.
+notas.re.mayor <- c(62, 64, 66, 67, 69, 71, 73, 74,
+                    76, 78, 79, 81, 83, 85, 86)
 
+# Notas de los compases interpretados de When You Wish.
+notas.wish <- c(64, 66, 67, 68, 69, 71, 72, 73, 74,
+                76, 77, 78, 79, 81, 83, 84, 86)
+
+# Se calcula el porcentaje de coincidencia.
 validacion.notas <- f0.canciones |>
   drop_na(midi) |>
   mutate(
     nota = round(midi),
-    coincide = if_else(
-      cancion == "Recuérdame",
-      nota %% 12 %in% notas.re.mayor,
-      nota %in% notas.wish
+    coincide = case_when(
+      cancion == "Recuérdame" ~ nota %in% notas.re.mayor,
+      cancion == "When You Wish Upon a Star" ~ nota %in% notas.wish
     )
   ) |>
-  summarise(porcentaje = 100 * mean(coincide), .by = cancion)
+  group_by(cancion) |>
+  summarise(porcentaje = 100 * mean(coincide))
 ```
 
 # Introducción 
@@ -283,6 +300,7 @@ tabla.resumen |>
 
 # Las zonas dividen en tres partes iguales el registro de ambas partituras,
 # que va de Mi4 (nota 64) a Re6 (nota 86).
+
 orden.zonas <- c(
   "Grave (de Mi4 a Si4)",
   "Media (de Do5 a Fa sostenido 5)",
@@ -294,9 +312,9 @@ zonas.canciones <- f0.canciones |>
   drop_na(midi) |>
   mutate(
     zona = case_when(
-      round(midi) <= 71 ~ orden.zonas[1],
-      round(midi) <= 78 ~ orden.zonas[2],
-      .default = orden.zonas[3]
+      round(midi) <= 71 ~ "Grave (de Mi4 a Si4)",
+      round(midi) <= 78 ~ "Media (de Do5 a Fa sostenido 5)",
+      .default = "Aguda (de Sol5 a Re6)"
     )
   ) |>
   count(cancion, zona) |>
@@ -491,7 +509,7 @@ Wolfe, J. (s.f.-b). *Strings, standing waves and harmonics*. School of Physics, 
 
 **Cómo se registra un sonido.** El sonido se produce cuando un objeto que vibra, como la cuerda de un violín, hace vibrar el aire que lo rodea. Esas variaciones de presión viajan por el aire en forma de onda hasta un micrófono, que las convierte en una señal eléctrica (Müller y Zunner, s.f.). Al grabar, el teléfono mide esa señal a intervalos regulares y guarda cada medición como un número, de modo que una grabación digital es una secuencia de valores. El número de mediciones por segundo es la frecuencia de muestreo (Tiberius, 2025): con 48 000 Hz, cada segundo de sonido queda registrado en 48 000 valores. Una grabación puede tener uno o dos canales: en mono se guarda una sola secuencia y en estéreo dos, la izquierda y la derecha (Ligges et al., 2023).
 
-**Uso de intelogencia artificial** Se utilizaron ChatGpt y Claude como herramientas de apoyo para la búsqueda de referencias, el desarrollo y la revisión del código, aí como para la redacción del informe. 
+**Uso de inteligencia artificial** Se utilizaron ChatGPT y Claude como herramientas de apoyo para la búsqueda de referencias, el desarrollo y la revisión del código, así como para la redacción del informe. Validado por María José Angulo Salas
 
 ![Compases 1 a 10 de *Recuérdame*, interpretados en la grabación. Fuente: Carrillo (2019).](../info/partitura_recuerdame.png){#fig-partitura-recuerdame width="100%"}
 
